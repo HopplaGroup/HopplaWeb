@@ -1,9 +1,9 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { createEnv } from '@t3-oss/env-nextjs';
+import { z } from 'zod';
 
 export const menv = createEnv({
   server: {
-    NODE_ENV: z.enum(["development", "test", "production"]),
+    NODE_ENV: z.enum(['development', 'test', 'production']),
     // AUTH
     KINDE_CLIENT_ID: z.string().min(1),
     MINIO_ENDPOINT: z.string().min(1),
@@ -37,6 +37,7 @@ export const menv = createEnv({
     NEXT_PUBLIC_KINDE_CONNECTION_GOOGLE: z.string().min(1),
     NEXT_PUBLIC_URL: z.string().min(1),
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().min(1),
+    NEXT_PUBLIC_CLARITY_PROJECT_ID: z.string().min(1),
   },
 
   runtimeEnv: {
@@ -71,6 +72,8 @@ export const menv = createEnv({
 
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+
+    NEXT_PUBLIC_CLARITY_PROJECT_ID: process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID,
   },
 
   skipValidation: true,
