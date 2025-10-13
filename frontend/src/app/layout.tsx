@@ -1,37 +1,37 @@
-import { LanguageProvider } from "@inlang/paraglide-next";
-import { languageTag } from "@/paraglide/runtime.js";
-import "react-loading-skeleton/dist/skeleton.css";
-import "react-responsive-pagination/themes/classic.css";
-import "@/lib/styles/globals.css";
-import { cn } from "@/lib/utils/cn";
-import { Toaster } from "react-hot-toast";
-import { getUser } from "@/lib/utils/auth";
-import type { Metadata, Viewport } from "next";
-import * as m from "@/paraglide/messages.js";
-import Script from "next/script";
-import { menv } from "@/lib/utils/menv";
-import BlockedUserPage from "./_components/BlockedUserPage";
-import Providers from "@/lib/providers";
-import ClarityInit from "./analytics/ClarityInit";
+import { LanguageProvider } from '@inlang/paraglide-next';
+import { languageTag } from '@/paraglide/runtime.js';
+import 'react-loading-skeleton/dist/skeleton.css';
+import 'react-responsive-pagination/themes/classic.css';
+import '@/lib/styles/globals.css';
+import { cn } from '@/lib/utils/cn';
+import { Toaster } from 'react-hot-toast';
+import { getUser } from '@/lib/utils/auth';
+import type { Metadata, Viewport } from 'next';
+import * as m from '@/paraglide/messages.js';
+import Script from 'next/script';
+import { menv } from '@/lib/utils/menv';
+import BlockedUserPage from './_components/BlockedUserPage';
+import Providers from '@/lib/providers';
+import ClarityInit from './analytics/ClarityInit';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    metadataBase: new URL("https://hoppla.ge"),
+    metadataBase: new URL('https://hoppla.ge'),
     title: m.weird_salty_baboon_slide(),
     description: m.long_suave_tern_intend(),
     openGraph: {
       locale: languageTag(),
-      images: "/assets/opengraph-image.jpg",
+      images: '/assets/opengraph-image.jpg',
     },
   };
 }
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: '#000000',
   initialScale: 1,
-  width: "device-width",
+  width: 'device-width',
   maximumScale: 1,
 };
 
@@ -44,14 +44,14 @@ export default async function RootLayout({
   return (
     <LanguageProvider>
       <html lang={languageTag()} suppressHydrationWarning>
-        <body className={cn("min-h-screen font-sans antialiased bg-gray-100")}>
+        <body className={cn('min-h-screen font-sans antialiased bg-gray-100')}>
           <Providers user={user}>
-            {user && user.status === "BLOCKED" ? <BlockedUserPage /> : children}
+            {user && user.status === 'BLOCKED' ? <BlockedUserPage /> : children}
             <Toaster />
           </Providers>
         </body>
 
-        {menv.NODE_ENV === "production" && (
+        {menv.NODE_ENV === 'production' && (
           <Script
             defer
             src="https://umami.hoppla.ge/script.js"
@@ -59,7 +59,21 @@ export default async function RootLayout({
           />
         )}
 
-        {menv.NODE_ENV === "production" && <ClarityInit />}
+        {menv.NODE_ENV === 'production' && (
+          <Script
+            type="text/javascript"
+            id="ms-clarity"
+            strategy="afterInteractive"
+          >
+            {`
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "tpflquesci");
+    `}
+          </Script>
+        )}
       </html>
     </LanguageProvider>
   );
