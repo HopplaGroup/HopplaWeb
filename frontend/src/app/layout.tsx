@@ -12,60 +12,55 @@ import Script from "next/script";
 import { menv } from "@/lib/utils/menv";
 import BlockedUserPage from "./_components/BlockedUserPage";
 import Providers from "@/lib/providers";
+import ClarityInit from "./analytics/ClarityInit";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-    return {
-        metadataBase: new URL("https://hoppla.ge"),
-        title: m.weird_salty_baboon_slide(),
-        description: m.long_suave_tern_intend(),
-        openGraph: {
-            locale: languageTag(),
-            images: "/assets/opengraph-image.jpg",
-        },
-    };
+  return {
+    metadataBase: new URL("https://hoppla.ge"),
+    title: m.weird_salty_baboon_slide(),
+    description: m.long_suave_tern_intend(),
+    openGraph: {
+      locale: languageTag(),
+      images: "/assets/opengraph-image.jpg",
+    },
+  };
 }
 
 export const viewport: Viewport = {
-    themeColor: "#000000",
-    initialScale: 1,
-    width: "device-width",
-    maximumScale: 1,
+  themeColor: "#000000",
+  initialScale: 1,
+  width: "device-width",
+  maximumScale: 1,
 };
 
 export default async function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    const user = await getUser();
-    return (
-        <LanguageProvider>
-            <html lang={languageTag()} suppressHydrationWarning>
-                <body
-                    className={cn(
-                        "min-h-screen font-sans antialiased bg-gray-100"
-                    )}
-                >
-                    <Providers user={user}>
-                        {user && user.status === "BLOCKED" ? (
-                            <BlockedUserPage />
-                        ) : (
-                            children
-                        )}
-                        <Toaster />
-                    </Providers>
-                </body>
+  const user = await getUser();
+  return (
+    <LanguageProvider>
+      <html lang={languageTag()} suppressHydrationWarning>
+        <body className={cn("min-h-screen font-sans antialiased bg-gray-100")}>
+          <Providers user={user}>
+            {user && user.status === "BLOCKED" ? <BlockedUserPage /> : children}
+            <Toaster />
+          </Providers>
+        </body>
 
-                {menv.NODE_ENV === "production" && (
-                    <Script
-                        defer
-                        src="https://umami.hoppla.ge/script.js"
-                        data-website-id="830aaf27-d46b-4952-9620-6d29c00e2617"
-                    />
-                )}
-            </html>
-        </LanguageProvider>
-    );
+        {menv.NODE_ENV === "production" && (
+          <Script
+            defer
+            src="https://umami.hoppla.ge/script.js"
+            data-website-id="830aaf27-d46b-4952-9620-6d29c00e2617"
+          />
+        )}
+
+        {menv.NODE_ENV === "production" && <ClarityInit />}
+      </html>
+    </LanguageProvider>
+  );
 }

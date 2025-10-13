@@ -27,6 +27,7 @@
     "@inlang/paraglide-next": "0.5.2",
     "@kinde-oss/kinde-auth-nextjs": "^2.3.6",
     "@libsql/client": "^0.6.0",
+    "@microsoft/clarity": "^1.0.0",
     "@mui/material": "^5.15.20",
     "@mui/material-nextjs": "^5.16.6",
     "@mui/x-date-pickers": "^7.7.0",
