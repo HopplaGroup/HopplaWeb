@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { getUser } from '@/lib/utils/auth';
-import { cn } from '@/lib/utils/cn';
+import { Button } from "@/components/ui/button";
+import { getUser } from "@/lib/utils/auth";
+import { cn } from "@/lib/utils/cn";
 import {
   AlertTriangle,
   Home,
@@ -8,15 +8,15 @@ import {
   Settings,
   ShieldQuestion,
   Ticket,
-} from 'lucide-react';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import React from 'react';
-import { SidebarNavigationLink } from './side-navigation-link';
-import db from '@/lib/utils/db';
+} from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import React from "react";
+import { SidebarNavigationLink } from "./side-navigation-link";
+import db from "@/lib/utils/db";
 
-import * as m from '@/paraglide/messages.js';
-import NotDriverAlert from './not-driver-alert';
+import * as m from "@/paraglide/messages.js";
+import NotDriverAlert from "./not-driver-alert";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ type LayoutProps = {
 export default async function ProfileLayout({ children }: LayoutProps) {
   const user = await getUser();
 
-  if (!user) redirect('/');
+  if (!user) redirect("/");
 
   const driverRequest = await db.driverVerificationRequest.findUnique({
     where: {
@@ -45,7 +45,7 @@ export default async function ProfileLayout({ children }: LayoutProps) {
     },
   });
 
-  const isUserDriver = driverRequest && driverRequest.status === 'APPROVED';
+  const isUserDriver = driverRequest && driverRequest.status === "APPROVED";
 
   const showDriverAlert = (firstCar || firstRide) && !isUserDriver;
 
@@ -54,19 +54,19 @@ export default async function ProfileLayout({ children }: LayoutProps) {
       icon: <Home size={22} />,
       label: m.caring_topical_jackal_slurp(),
       description: m.big_patient_hawk_dance(),
-      href: '/profile',
+      href: "/profile",
     },
     {
       icon: <Milestone size={22} />,
       label: m.candid_silly_stingray_tear(),
       description: m.ago_happy_kitten_snip(),
-      href: '/profile/rides',
+      href: "/profile/rides",
     },
     {
       icon: <Ticket size={22} />,
       label: m.long_upper_seal_revive(),
       description: m.flat_fresh_duck_bake(),
-      href: '/profile/trips',
+      href: "/profile/trips",
     },
   ];
 
@@ -75,7 +75,7 @@ export default async function ProfileLayout({ children }: LayoutProps) {
       icon: <Settings size={22} />,
       label: m.elegant_whole_crocodile_foster(),
       description: m.lazy_front_bird_feast(),
-      href: '/profile/settings',
+      href: "/profile/settings",
     },
   ];
 
@@ -86,7 +86,7 @@ export default async function ProfileLayout({ children }: LayoutProps) {
         <SidebarNavigation navLinks={NAV_LINKS} manageLinks={MANAGE_LINKS} />
         <div>
           <div>{children}</div>
-          <NotDriverAlert />
+          {/* <NotDriverAlert /> */}
         </div>
       </div>
     </div>

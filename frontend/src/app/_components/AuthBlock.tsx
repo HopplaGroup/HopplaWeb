@@ -109,7 +109,7 @@ export default function AuthBlock({
               )}
 
               {/* Driver Verification Link - conditional */}
-              {(!user.driverVerificationRequest ||
+              {/* {(!user.driverVerificationRequest ||
                 user.driverVerificationRequest.status == "PENDING") && (
                 <Link
                   href="/send-driver-verification"
@@ -119,7 +119,7 @@ export default function AuthBlock({
                   <FileCheck className="h-4 w-4 mr-2" />
                   {m.suave_keen_lion_enjoy()}
                 </Link>
-              )}
+              )} */}
 
               {/* Logout Link */}
               <div className="p-0">
