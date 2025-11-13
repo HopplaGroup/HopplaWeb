@@ -1,3 +1,4 @@
+'use client';
 // components/RideCard.tsx
 import Link from 'next/link';
 import { format } from 'date-fns';
