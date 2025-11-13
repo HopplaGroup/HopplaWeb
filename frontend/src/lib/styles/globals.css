@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url('//cdn.web-fonts.ge/fonts/bpg-banner/css/bpg-banner.min.css');
+@import url('//cdn.web-fonts.ge/fonts/bpg-glaho-arial/css/bpg-glaho-arial.min.css');
 
 @tailwind base;
 @tailwind components;
@@ -64,6 +65,7 @@
     --chart-5: 340 75% 55%;
   }
 }
+@import url("//cdn.web-fonts.ge/fonts/bpg-arial/css/bpg-arial.min.css");
 
 @font-face {
   font-family: 'BPG MRGVLovani';
@@ -75,8 +77,8 @@
 @layer base {
   * {
     @apply border-gray-200;
-    font-family: 'Poppins', 'BPG Banner', sans-serif;
-    /* font-family: "BPG Banner", sans-serif; */
+    font-family: 'Poppins', 'BPG Arial', sans-serif;
+
   }
 
   body {

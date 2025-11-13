@@ -1,15 +1,16 @@
-"use client";
-import Image from "next/image";
-import * as m from "@/paraglide/messages.js";
-import { menv } from "@/lib/utils/menv";
-import { cn } from "@/lib/utils/cn";
+'use client';
+import Image from 'next/image';
+import * as m from '@/paraglide/messages.js';
+import { menv } from '@/lib/utils/menv';
+import { cn } from '@/lib/utils/cn';
 import {
+  LoginLink,
   LogoutLink,
   RegisterLink,
-} from "@kinde-oss/kinde-auth-nextjs/components";
-import { Prisma } from "@prisma/client";
-import { Link } from "@/lib/i18n";
-import { useState, useRef, useEffect } from "react";
+} from '@kinde-oss/kinde-auth-nextjs/components';
+import { Prisma } from '@prisma/client';
+import { Link } from '@/lib/i18n';
+import { useState, useRef, useEffect } from 'react';
 import {
   ChevronDown,
   User,
@@ -17,7 +18,9 @@ import {
   LogOut,
   Shield,
   FileCheck,
-} from "lucide-react";
+  LogIn,
+  UserPlus,
+} from 'lucide-react';
 
 export default function AuthBlock({
   user,
@@ -40,9 +43,9 @@ export default function AuthBlock({
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -97,7 +100,7 @@ export default function AuthBlock({
               </Link>
 
               {/* Admin Link - conditional */}
-              {user.role === "ADMIN" && (
+              {user.role === 'ADMIN' && (
                 <Link
                   href="/admin"
                   className="flex items-center px-4 py-2 text-sm  hover:bg-gray-100"
@@ -137,7 +140,7 @@ export default function AuthBlock({
       )}
 
       {/* Login button for non-authenticated users */}
-      {!user && (
+      {/* {!user && (
         <RegisterLink
           authUrlParams={{
             connection_id: menv.NEXT_PUBLIC_KINDE_CONNECTION_GOOGLE,
@@ -158,6 +161,37 @@ export default function AuthBlock({
             </span>
           </>
         </RegisterLink>
+      )} */}
+
+      {!user && (
+        <div className="flex items-center gap-2">
+          <LoginLink
+            className={cn(
+              'bg-transparent hover:bg-gray-200 ',
+              'flex items-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium transition-colors'
+            )}
+          >
+            <>
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:block">
+                {m.plane_weird_macaw_slurp()}
+              </span>
+            </>
+          </LoginLink>
+          <RegisterLink
+            className={cn(
+              'bg-primary hover:bg-primary/80 text-white ',
+              'flex items-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium transition-colors'
+            )}
+          >
+            <>
+              <UserPlus className="h-4 w-4" />
+              <span className="hidden sm:block">
+                {m.stock_giant_firefox_belong()}
+              </span>
+            </>
+          </RegisterLink>
+        </div>
       )}
     </>
   );
