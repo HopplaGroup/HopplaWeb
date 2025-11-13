@@ -48,7 +48,12 @@ const RideCard: React.FC<RideCardProps> = ({
             <div className="flex-1">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg">
                 <span className="text-sm font-medium text-gray-800">
-                  {format(ride.departure, 'd MMMM', { locale })}
+                  {/* {format(ride.departure, 'd MMMM', { locale })} */}
+                  {format(
+                    new Date(new Date(ride.departure).getTime()),
+                    'd MMMM',
+                    { locale }
+                  )}
                 </span>
               </div>
             </div>
@@ -92,7 +97,11 @@ const RideCard: React.FC<RideCardProps> = ({
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-10 h-7 bg-gray-100 rounded-lg">
                     <span className="text-sm font-semibold text-gray-800">
-                      {format(new Date(ride.departure), 'HH:mm')}
+                      {/* {format(new Date(ride.departure), 'HH:mm')} */}
+                      {format(
+                        new Date(new Date(ride.departure).getTime()),
+                        'HH:mm'
+                      )}
                     </span>
                   </div>
                   <div className="w-2 h-2 rounded-full bg-gray-400"></div>
@@ -144,7 +153,11 @@ const RideCard: React.FC<RideCardProps> = ({
                   <div className="text-center">
                     <div className="flex items-center justify-center w-16 h-10 bg-gray-100 rounded-lg mb-2">
                       <span className="text-lg font-bold text-gray-800">
-                        {format(new Date(ride.departure), 'HH:mm')}
+                        {/* {format(new Date(ride.departure), 'HH:mm')} */}
+                        {format(
+                          new Date(new Date(ride.departure).getTime()),
+                          'HH:mm'
+                        )}
                       </span>
                     </div>
                     <div className="font-medium text-gray-800">
