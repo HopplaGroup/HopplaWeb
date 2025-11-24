@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - postgres-backups:/backups
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U postgres -d postgres'",
+        ]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+      
+volumes:
+  postgres-data:
+    driver: local
+  postgres-backups:
+    driver: local

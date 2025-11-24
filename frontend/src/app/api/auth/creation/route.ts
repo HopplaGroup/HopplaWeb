@@ -10,21 +10,28 @@ export async function GET() {
         const { getUser: _getKindeUser } = getKindeServerSession();
 
         const kindeUser = await _getKindeUser();
-
         if (
             !kindeUser ||
             kindeUser === null ||
-            !kindeUser.id ||
-            !kindeUser.email
+            !kindeUser.id 
         ) {
             throw new Error("Something went wrong, sorry...");
         }
 
+        console.log("kindeUser", kindeUser);
         let dbUser = await db.user.findUnique({
             where: {
-                email: kindeUser.email,
+                email: kindeUser.id,
             },
         });
+
+        if(!dbUser && kindeUser.email) {
+            dbUser = await db.user.findUnique({
+                where: {
+                    email: kindeUser.email,
+                },
+            });
+        }
 
         const firstName = kindeUser.given_name || "";
         const lastName = kindeUser.family_name || "";
@@ -33,7 +40,7 @@ export async function GET() {
         if (!dbUser) {
             dbUser = await db.user.create({
                 data: {
-                    email: kindeUser.email,
+                    email: kindeUser.id,
                     name: fullName,
                     profileImg: kindeUser.picture || "/default-pfp.jpg",
                 },

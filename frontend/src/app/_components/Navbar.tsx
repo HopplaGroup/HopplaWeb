@@ -1,9 +1,9 @@
 "use client";
-import { Plus, Ticket, X, Menu, Home, Info, Phone, Car } from "lucide-react";
+import { Plus, Ticket, X, Menu, Home, Info, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import * as m from "@/paraglide/messages.js";
-import { Prisma, User } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import Logo from "@/app/_components/Logo";
 import LanguageSwitcher from "./LanguageSwitcher";
 import AuthBlock from "./AuthBlock";
@@ -50,6 +50,7 @@ export default function Navbar({
                 <div className="flex h-16 md:h-20 items-center justify-between">
                     <div className="flex items-center gap-2 md:gap-6">
                         <button
+                            type="button"
                             className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 transition-colors duration-200"
                             onClick={openSidebar}
                             aria-label="Toggle menu"
@@ -68,13 +69,12 @@ export default function Navbar({
                         </div>
 
                         <div className="items-center space-x-1 hidden lgx:flex">
-                            {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+                            {NAV_ITEMS.map(({ href, label }) => (
                                 <Link
                                     key={href}
                                     href={href}
                                     className="relative font-medium px-3 py-2 text-sm text-gray-900 flex items-center gap-2 transition-colors group"
                                 >
-                                    {/* <Icon size={18} className="" /> */}
                                     <span className="">{label}</span>
                                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
                                 </Link>
@@ -98,18 +98,22 @@ export default function Navbar({
                             </Link>
                         )}
 
-                        <div className="h-6 w-px bg-gray-300 hidden md:block"></div>
+                        {user && (
+                            <div className="h-6 w-px bg-gray-300 hidden md:block"></div>
+                        )}
 
                         <div className="flex items-center gap-0">
-                            <Link
-                                href="/upcoming-rides"
-                                className="flex items-center gap-2 px-4 py-3.5 text-sm font-medium bg-transparent hover:bg-gray-200 rounded-full focus:outline-none transition-colors"
-                            >
-                                <Ticket size={18} />
-                                <span className="hidden lg:inline font-medium text-sm">
-                                    {m.odd_sleek_mink_taste()}
-                                </span>
-                            </Link>
+                            {user && (
+                                <Link
+                                    href="/upcoming-rides"
+                                    className="flex items-center gap-2 px-4 py-3.5 text-sm font-medium bg-transparent hover:bg-gray-200 rounded-full focus:outline-none transition-colors"
+                                >
+                                    <Ticket size={18} />
+                                    <span className="hidden lg:inline font-medium text-sm">
+                                        {m.odd_sleek_mink_taste()}
+                                    </span>
+                                </Link>
+                            )}
                             <AuthBlock user={user} />
                         </div>
                     </div>

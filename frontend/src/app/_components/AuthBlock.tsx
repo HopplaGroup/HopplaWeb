@@ -1,26 +1,20 @@
 'use client';
 import Image from 'next/image';
 import * as m from '@/paraglide/messages.js';
-import { menv } from '@/lib/utils/menv';
 import { cn } from '@/lib/utils/cn';
-import {
-  LoginLink,
-  LogoutLink,
-  RegisterLink,
-} from '@kinde-oss/kinde-auth-nextjs/components';
-import { Prisma } from '@prisma/client';
+import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components';
+import type { Prisma } from '@prisma/client';
 import { Link } from '@/lib/i18n';
 import { useState, useRef, useEffect } from 'react';
 import {
   ChevronDown,
   User,
-  Settings,
   LogOut,
   Shield,
-  FileCheck,
   LogIn,
   UserPlus,
 } from 'lucide-react';
+import { AuthModal } from './AuthModals';
 
 export default function AuthBlock({
   user,
@@ -30,6 +24,8 @@ export default function AuthBlock({
   }> | null;
 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close dropdown
@@ -59,6 +55,7 @@ export default function AuthBlock({
       {user && (
         <div className="relative" ref={dropdownRef}>
           <button
+            type="button"
             className="relative flex min-w-10 justify-between items-center py-3.5 px-4 rounded-full bg-transparent hover:bg-gray-200 transition-colors"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
@@ -164,34 +161,52 @@ export default function AuthBlock({
       )} */}
 
       {!user && (
-        <div className="flex items-center gap-2">
-          <LoginLink
-            className={cn(
-              'bg-transparent hover:bg-gray-200 ',
-              'flex items-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium transition-colors'
-            )}
-          >
-            <>
+        <>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('login');
+                setIsAuthModalOpen(true);
+              }}
+              className={cn(
+                'bg-transparent hover:bg-gray-200 ',
+                'flex items-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium transition-colors'
+              )}
+            >
               <LogIn className="h-4 w-4" />
               <span className="hidden sm:block">
                 {m.plane_weird_macaw_slurp()}
               </span>
-            </>
-          </LoginLink>
-          <RegisterLink
-            className={cn(
-              'bg-primary hover:bg-primary/80 text-white ',
-              'flex items-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium transition-colors'
-            )}
-          >
-            <>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('register');
+                setIsAuthModalOpen(true);
+              }}
+              className={cn(
+                'bg-primary hover:bg-primary/80 text-white ',
+                'flex items-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium transition-colors'
+              )}
+            >
               <UserPlus className="h-4 w-4" />
               <span className="hidden sm:block">
                 {m.stock_giant_firefox_belong()}
               </span>
-            </>
-          </RegisterLink>
-        </div>
+            </button>
+          </div>
+
+          {/* Auth Modal */}
+          <AuthModal
+            isOpen={isAuthModalOpen}
+            onClose={() => setIsAuthModalOpen(false)}
+            mode={authMode}
+            onSwitchMode={() => {
+              setAuthMode(authMode === 'login' ? 'register' : 'login');
+            }}
+          />
+        </>
       )}
     </>
   );

@@ -103,7 +103,6 @@ model User {
   createdAt                 DateTime                   @default(now())
   updatedAt                 DateTime                   @updatedAt()
   isNewUser                 Boolean                    @default(true)
-  /// @email
   email                     String                     @unique()
   /// @length(min: 1, max: 50)
   name                      String

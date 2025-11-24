@@ -2,31 +2,16 @@
 
 import {
     Home,
-    Info,
     Ticket,
     Menu,
-    X,
-    Phone,
     Plus,
     User as UserIcon,
-    Globe,
-    Settings,
-    Milestone,
-    LogOut,
-    Shield,
-    CarFront,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as m from "@/paraglide/messages.js";
-import { Prisma, User } from "@prisma/client";
-import {
-    LogoutLink,
-    RegisterLink,
-} from "@kinde-oss/kinde-auth-nextjs/components";
-import { menv } from "@/lib/utils/menv";
-import { cn } from "@/lib/utils/cn";
-import LanguageSwitcher from "./LanguageSwitcher";
+import type { Prisma } from "@prisma/client";
+import { AuthModal } from "./AuthModals";
 
 export default function BottomNavigation({
     user,
@@ -37,6 +22,8 @@ export default function BottomNavigation({
     }> | null;
     openSidebar: () => void;
 }) {
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
     const MAIN_NAV_ITEMS = [
         { href: "/", label: m.lofty_nimble_goat_succeed(), icon: Home },
@@ -64,12 +51,12 @@ export default function BottomNavigation({
                 <div className="h-px bg-gray-200"></div>
                 <div className="flex justify-around items-center h-16">
                     {MAIN_NAV_ITEMS.map(
-                        ({ href, label, icon: Icon, requiresAuth }, index) => {
+                        ({ href, label, icon: Icon, requiresAuth }) => {
                             if (requiresAuth && !user) return null;
 
                             return (
                                 <Link
-                                    key={index}
+                                    key={href}
                                     href={href}
                                     prefetch={false}
                                     className="flex flex-col items-center justify-center flex-1 h-full py-1 hover:text-primary transition-colors"
@@ -83,24 +70,24 @@ export default function BottomNavigation({
                         }
                     )}
                     {!user && (
-                        <RegisterLink
-                            authUrlParams={{
-                                connection_id:
-                                    menv.NEXT_PUBLIC_KINDE_CONNECTION_GOOGLE,
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setAuthMode('login');
+                                setIsAuthModalOpen(true);
                             }}
                             className="flex flex-col items-center justify-center flex-1 h-full py-1 hover:text-primary transition-colors"
                         >
-                            <>
-                                <UserIcon size={20} className="mb-1" />
-                                <span className="text-xs font-medium line-clamp-1 max-w-20 text-center">
-                                    {m.plane_weird_macaw_slurp()}
-                                </span>
-                            </>
-                        </RegisterLink>
+                            <UserIcon size={20} className="mb-1" />
+                            <span className="text-xs font-medium line-clamp-1 max-w-20 text-center">
+                                {m.plane_weird_macaw_slurp()}
+                            </span>
+                        </button>
                     )}
 
                     {/* More menu button */}
                     <button
+                        type="button"
                         onClick={openSidebar}
                         className="flex flex-col items-center justify-center flex-1 h-full py-1 hover:text-primary transition-colors"
                     >
@@ -112,7 +99,17 @@ export default function BottomNavigation({
                 </div>
             </div>
 
-     
+            {/* Auth Modal */}
+            {!user && (
+                <AuthModal
+                    isOpen={isAuthModalOpen}
+                    onClose={() => setIsAuthModalOpen(false)}
+                    mode={authMode}
+                    onSwitchMode={() => {
+                        setAuthMode(authMode === 'login' ? 'register' : 'login');
+                    }}
+                />
+            )}
         </>
     );
 }

@@ -10,7 +10,8 @@ export const getUser = cache(
         include?: T
     ): Promise<Prisma.UserGetPayload<{ include: T }> | null> => {
         try {
-            let email = "";
+            let email = undefined
+            let id = undefined;
             if (process.env.AUTH_TESTER_EMAIL) {
                 email = process.env.AUTH_TESTER_EMAIL;
             } else {
@@ -19,15 +20,26 @@ export const getUser = cache(
                 if (!kindeUser) {
                     throw new Error("Kinde user not found");
                 }
-                if (!kindeUser.email) {
-                    throw new Error("Kinde user email not found");
-                }
-                email = kindeUser.email;
+             
+                
+                email = kindeUser.email || undefined;
+                id = kindeUser.id || undefined;
             }
-            const dbUser = await db.user.findUnique({
-                where: { email },
-                include,
-            });
+
+
+            let dbUser = null;
+            if(email) {
+                dbUser = await db.user.findUnique({
+                    where: { email: email },
+                    include,
+                });
+            }
+            if(id ) {
+                dbUser = dbUser || await db.user.findUnique({
+                    where: { email: id },
+                    include,
+                });
+            }
 
             return dbUser as any;
         } catch (error) {
