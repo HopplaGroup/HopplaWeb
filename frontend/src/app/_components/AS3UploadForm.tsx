@@ -54,7 +54,7 @@ export const UploadForm = ({
         if (uploading) return;
         const file = e.target.files?.[0];
         if (!file) return;
-        if (file.size > 5 * 1024 * 1024) {
+        if (file.size > 25 * 1024 * 1024) {
             toast.error(m.lazy_merry_ibex_shine());
             return;
         }
