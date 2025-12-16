@@ -23,6 +23,11 @@ enum UserRole {
   ADMIN
 }
 
+enum TripRequestStatus {
+  ACTIVE
+  CANCELLED
+}
+
 enum RideStatus {
   ACTIVE
   CANCELLED
@@ -125,6 +130,7 @@ model User {
   isUserVerified            Boolean                    @default(false)
   driverVerificationRequest DriverVerificationRequest?
   ridesAsDriver             Ride[]                     @relation("RideDriver")
+  tripRequests              PassengerTripRequest[]     @relation("TripRequestAuthor")
   passengerRideRequests     RidePassengerRequest[]
   cars                      Car[]
   userReviewsByMe           UserReview[]               @relation("ReviewAuthor")
@@ -183,6 +189,32 @@ model Car {
   ownerId       String
   rides         Ride[]
   demetre       Int?
+}
+
+/// @@deny('all', auth().status == 'BLOCKED')
+/// @@allow('all', auth().role == 'ADMIN')
+/// @@allow('create', auth() != null)
+/// @@allow('read', true)
+/// @@allow('update', auth() == author)
+/// @@allow('delete', auth() == author)
+model PassengerTripRequest {
+  id            String            @id() @default(cuid())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt()
+  /// @length(min: 1, max: 50)
+  from          String
+  /// @length(min: 1, max: 50)
+  to            String
+  departureFrom DateTime
+  departureTo   DateTime
+  /// @gte(1)
+  seats         Int               @default(1)
+  status        TripRequestStatus @default(ACTIVE)
+  /// @length(min: 1, max: 500)
+  description   String?
+  author        User              @relation("TripRequestAuthor", fields: [authorId], references: [id])
+  authorId      String
+  requestRules  TripRequestRule[]
 }
 
 /// @@deny('all', auth().status == 'BLOCKED')
@@ -251,6 +283,24 @@ model RideStartedConfirmation {
 
 /// @@deny('all', auth().status == 'BLOCKED')
 /// @@allow('all', auth().role == 'ADMIN')
+/// @@allow('create', auth() == rideRequest.author)
+/// @@allow('read', true)
+/// @@allow('update', false)
+/// @@allow('delete', auth() == rideRequest.author)
+model TripRequestRule {
+  id            String               @id() @default(cuid())
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt()
+  rule          Rule                 @relation(fields: [ruleId], references: [id])
+  ruleId        String
+  rideRequest   PassengerTripRequest @relation(fields: [rideRequestId], references: [id])
+  rideRequestId String
+
+  @@unique([ruleId, rideRequestId])
+}
+
+/// @@deny('all', auth().status == 'BLOCKED')
+/// @@allow('all', auth().role == 'ADMIN')
 /// @@allow('create', auth() == ride.driver)
 /// @@allow('read', true)
 /// @@allow('update', false)
@@ -274,13 +324,14 @@ model RideRule {
 /// @@allow('update', false)
 /// @@allow('delete', false)
 model Rule {
-  id        String     @id() @default(cuid())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt()
-  price     Float
-  labels    Json       @default("{ \"en\": \"No Smoking\", \"ka\": \"არ ვეწევით\" }")
-  svg       String     @default("")
-  ruleRides RideRule[]
+  id               String            @id() @default(cuid())
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt()
+  price            Float
+  labels           Json              @default("{ \"en\": \"No Smoking\", \"ka\": \"არ ვეწევით\" }")
+  svg              String            @default("")
+  ruleRides        RideRule[]
+  ruleRideRequests TripRequestRule[]
 }
 
 /// @@deny('all', auth().status == 'BLOCKED')
