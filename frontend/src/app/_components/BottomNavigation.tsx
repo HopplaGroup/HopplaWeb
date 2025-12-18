@@ -4,7 +4,6 @@ import {
     Home,
     Ticket,
     Menu,
-    Plus,
     User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -12,6 +11,7 @@ import { useState } from "react";
 import * as m from "@/paraglide/messages.js";
 import type { Prisma } from "@prisma/client";
 import { AuthModal } from "./AuthModals";
+import MessagesNavItem from "./MessagesNavItem";
 
 export default function BottomNavigation({
     user,
@@ -32,12 +32,6 @@ export default function BottomNavigation({
             label: m.odd_sleek_mink_taste(),
             icon: Ticket,
         },
-        {
-            href: "/add-ride",
-            label: m.actual_watery_fireant_foster(),
-            icon: Plus,
-            requiresAuth: true,
-        },
     ];
 
   
@@ -50,24 +44,25 @@ export default function BottomNavigation({
             >
                 <div className="h-px bg-gray-200"></div>
                 <div className="flex justify-around items-center h-16">
-                    {MAIN_NAV_ITEMS.map(
-                        ({ href, label, icon: Icon, requiresAuth }) => {
-                            if (requiresAuth && !user) return null;
-
-                            return (
-                                <Link
-                                    key={href}
-                                    href={href}
-                                    prefetch={false}
-                                    className="flex flex-col items-center justify-center flex-1 h-full py-1 hover:text-primary transition-colors"
-                                >
-                                    <Icon size={20} className="mb-1" />
-                                    <span className="text-xs font-medium line-clamp-1 max-w-20 text-center">
-                                        {label}
-                                    </span>
-                                </Link>
-                            );
-                        }
+                    {MAIN_NAV_ITEMS.map(({ href, label, icon: Icon }) => (
+                        <Link
+                            key={href}
+                            href={href}
+                            prefetch={false}
+                            className="flex flex-col items-center justify-center flex-1 h-full py-1 hover:text-primary transition-colors"
+                        >
+                            <Icon size={20} className="mb-1" />
+                            <span className="text-xs font-medium line-clamp-1 max-w-20 text-center">
+                                {label}
+                            </span>
+                        </Link>
+                    ))}
+                    {user && (
+                        <MessagesNavItem
+                            userId={user.id}
+                            variant="bottom-nav"
+                            label={m.sea_tidy_seahorse_slide()}
+                        />
                     )}
                     {!user && (
                         <button

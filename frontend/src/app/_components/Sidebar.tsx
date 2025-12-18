@@ -7,6 +7,7 @@ import {
     LogOut,
     Milestone,
     Phone,
+    Plus,
     Settings,
     Shield,
     Ticket,
@@ -33,6 +34,12 @@ export default function Sidebar({
     }> | null;
 }) {
     const SIDEBAR_NAV_ITEMS = [
+        {
+            href: "/add-ride",
+            label: m.actual_watery_fireant_foster(),
+            icon: Plus,
+            requiresAuth: true,
+        },
         { href: "/about", label: m.tense_every_swallow_clap(), icon: Info },
         { href: "/contact", label: m.round_sour_gazelle_peel(), icon: Phone },
         {

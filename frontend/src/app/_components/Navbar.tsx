@@ -7,6 +7,7 @@ import type { Prisma } from "@prisma/client";
 import Logo from "@/app/_components/Logo";
 import LanguageSwitcher from "./LanguageSwitcher";
 import AuthBlock from "./AuthBlock";
+import MessagesNavItem from "./MessagesNavItem";
 
 export default function Navbar({
     user,
@@ -113,6 +114,12 @@ export default function Navbar({
                                         {m.odd_sleek_mink_taste()}
                                     </span>
                                 </Link>
+                            )}
+                            {user && (
+                                <MessagesNavItem
+                                    userId={user.id}
+                                    variant="navbar"
+                                />
                             )}
                             <AuthBlock user={user} />
                         </div>

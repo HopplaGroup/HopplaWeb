@@ -1,5 +1,5 @@
 import { getUser } from '@/lib/utils/auth';
-import Footer from './Footer';
+import FooterWrapper from './FooterWrapper';
 import WholeNavigation from './WholeNavigation';
 
 export default async function WithNavbarAndFooter({
@@ -22,7 +22,7 @@ export default async function WithNavbarAndFooter({
       </header>
       <main className="md:mt-20 mb-10">{children}</main>
       <div>
-        <Footer />
+        <FooterWrapper />
       </div>
     </div>
   );

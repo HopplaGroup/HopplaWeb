@@ -8,5 +8,8 @@ export * from './ride-rule';
 export * from './rule';
 export * from './user-review';
 export * from './contact-submission';
+export * from './conversation';
+export * from './conversation-participant';
+export * from './message';
 export { getQueryKey } from '@zenstackhq/tanstack-query/runtime-v5';
 export { Provider } from '@zenstackhq/tanstack-query/runtime-v5/react';

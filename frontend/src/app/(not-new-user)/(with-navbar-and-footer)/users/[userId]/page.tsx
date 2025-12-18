@@ -28,6 +28,8 @@ import ContentWithReviews from "./content-with-reviews";
 import Link from "next/link";
 import SearchBarLanding from "../../_components/ASearchBarLanding";
 import * as m from "@/paraglide/messages.js";
+import { useUser } from "@/lib/providers/UserProvider";
+import StartConversationButton from "../messages/start-conversation-button";
 
 type UserPageProps = {
     params: { userId: string };
@@ -36,6 +38,7 @@ type UserPageProps = {
 
 export default function UserPage({ params, searchParams }: UserPageProps) {
     const { userId } = params;
+    const { user: currentUser } = useUser();
     const { data: user, isLoading: isUserLoading } = useFindUniqueUser({
         where: {
             id: userId,
@@ -68,6 +71,7 @@ export default function UserPage({ params, searchParams }: UserPageProps) {
     }, [userReviews]);
     // console.log(user);
     const isDriver = user?.driverVerificationRequest?.status === "APPROVED";
+    const isOwnProfile = currentUser?.id === userId;
 
     return (
         <ContentWithReviews userId={userId}>
@@ -140,6 +144,13 @@ export default function UserPage({ params, searchParams }: UserPageProps) {
                                         {/* <div>{user.bio}</div> */}
                                     </div>
                                 </div>
+                                {!isOwnProfile && currentUser && (
+                                    <div className="pt-6 flex justify-center sm:justify-start">
+                                        <StartConversationButton
+                                            otherUserId={userId}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="RIGHT SIDE w-full">

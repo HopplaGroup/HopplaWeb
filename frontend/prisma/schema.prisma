@@ -130,6 +130,8 @@ model User {
   userReviewsByMe           UserReview[]               @relation("ReviewAuthor")
   userReviewsAboutMe        UserReview[]               @relation("ReviewReviewee")
   rideStartedConfirmations  RideStartedConfirmation[]
+  conversationParticipants  ConversationParticipant[]
+  messagesSent              Message[]
 
   @@index([email])
   @@index([role])
@@ -322,4 +324,47 @@ model ContactSubmission {
   message   String
   status    ContactSubmissionStatus @default(NEW)
   type      ContactSubmissionType
+}
+
+/// @@deny('all', auth().status == 'BLOCKED')
+/// @@allow('all', auth().role == 'ADMIN')
+/// @@allow('all', true)
+model Conversation {
+  id           String                    @id() @default(cuid())
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt()
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+/// @@deny('all', auth().status == 'BLOCKED')
+/// @@allow('all', auth().role == 'ADMIN')
+/// @@allow('all', true)
+model ConversationParticipant {
+  id             String       @id() @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt()
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  lastReadAt     DateTime?
+
+  @@unique([userId, conversationId])
+}
+
+/// @@deny('all', auth().status == 'BLOCKED')
+/// @@allow('all', auth().role == 'ADMIN')
+/// @@allow('all', true)
+model Message {
+  id             String       @id() @default(cuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt()
+  content        String
+  sender         User         @relation(fields: [senderId], references: [id])
+  senderId       String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+
+  @@index([conversationId, createdAt])
 }

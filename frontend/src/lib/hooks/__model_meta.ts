@@ -111,6 +111,18 @@ const metadata = {
                     isDataModel: true,
                     isArray: true,
                     backLink: 'user',
+                }, conversationParticipants: {
+                    name: "conversationParticipants",
+                    type: "ConversationParticipant",
+                    isDataModel: true,
+                    isArray: true,
+                    backLink: 'user',
+                }, messagesSent: {
+                    name: "messagesSent",
+                    type: "Message",
+                    isDataModel: true,
+                    isArray: true,
+                    backLink: 'sender',
                 },
             }
             , uniqueConstraints: {
@@ -678,9 +690,162 @@ const metadata = {
             ,
         }
         ,
+        conversation: {
+            name: 'Conversation', fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    isId: true,
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@updatedAt", "args": [] }],
+                }, participants: {
+                    name: "participants",
+                    type: "ConversationParticipant",
+                    isDataModel: true,
+                    isArray: true,
+                    backLink: 'conversation',
+                }, messages: {
+                    name: "messages",
+                    type: "Message",
+                    isDataModel: true,
+                    isArray: true,
+                    backLink: 'conversation',
+                },
+            }
+            , uniqueConstraints: {
+                id: {
+                    name: "id",
+                    fields: ["id"]
+                },
+            }
+            ,
+        }
+        ,
+        conversationParticipant: {
+            name: 'ConversationParticipant', fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    isId: true,
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@updatedAt", "args": [] }],
+                }, user: {
+                    name: "user",
+                    type: "User",
+                    isDataModel: true,
+                    backLink: 'conversationParticipants',
+                    isRelationOwner: true,
+                    foreignKeyMapping: { "id": "userId" },
+                }, userId: {
+                    name: "userId",
+                    type: "String",
+                    attributes: [{ "name": "@default", "args": [] }],
+                    isForeignKey: true,
+                    relationField: 'user',
+                    defaultValueProvider: $default$ConversationParticipant$userId,
+                }, conversation: {
+                    name: "conversation",
+                    type: "Conversation",
+                    isDataModel: true,
+                    backLink: 'participants',
+                    isRelationOwner: true,
+                    foreignKeyMapping: { "id": "conversationId" },
+                }, conversationId: {
+                    name: "conversationId",
+                    type: "String",
+                    isForeignKey: true,
+                    relationField: 'conversation',
+                }, lastReadAt: {
+                    name: "lastReadAt",
+                    type: "DateTime",
+                    isOptional: true,
+                },
+            }
+            , uniqueConstraints: {
+                id: {
+                    name: "id",
+                    fields: ["id"]
+                }, userId_conversationId: {
+                    name: "userId_conversationId",
+                    fields: ["userId", "conversationId"]
+                },
+            }
+            ,
+        }
+        ,
+        message: {
+            name: 'Message', fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    isId: true,
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@updatedAt", "args": [] }],
+                }, content: {
+                    name: "content",
+                    type: "String",
+                }, sender: {
+                    name: "sender",
+                    type: "User",
+                    isDataModel: true,
+                    backLink: 'messagesSent',
+                    isRelationOwner: true,
+                    foreignKeyMapping: { "id": "senderId" },
+                }, senderId: {
+                    name: "senderId",
+                    type: "String",
+                    attributes: [{ "name": "@default", "args": [] }],
+                    isForeignKey: true,
+                    relationField: 'sender',
+                    defaultValueProvider: $default$Message$senderId,
+                }, conversation: {
+                    name: "conversation",
+                    type: "Conversation",
+                    isDataModel: true,
+                    backLink: 'messages',
+                    isRelationOwner: true,
+                    foreignKeyMapping: { "id": "conversationId" },
+                }, conversationId: {
+                    name: "conversationId",
+                    type: "String",
+                    isForeignKey: true,
+                    relationField: 'conversation',
+                },
+            }
+            , uniqueConstraints: {
+                id: {
+                    name: "id",
+                    fields: ["id"]
+                },
+            }
+            ,
+        }
+        ,
     }
     ,
     deleteCascade: {
+        conversation: ['ConversationParticipant', 'Message'],
     }
     ,
     authModel: 'User'
@@ -706,6 +871,14 @@ function $default$RideStartedConfirmation$userId(user: any): unknown {
 }
 
 function $default$UserReview$authorId(user: any): unknown {
+    return user?.id;
+}
+
+function $default$ConversationParticipant$userId(user: any): unknown {
+    return user?.id;
+}
+
+function $default$Message$senderId(user: any): unknown {
     return user?.id;
 }
 export default metadata;
