@@ -81,6 +81,12 @@ const metadata = {
                     isDataModel: true,
                     isArray: true,
                     backLink: 'driver',
+                }, tripRequests: {
+                    name: "tripRequests",
+                    type: "PassengerTripRequest",
+                    isDataModel: true,
+                    isArray: true,
+                    backLink: 'author',
                 }, passengerRideRequests: {
                     name: "passengerRideRequests",
                     type: "RidePassengerRequest",
@@ -259,6 +265,76 @@ const metadata = {
                     name: "demetre",
                     type: "Int",
                     isOptional: true,
+                },
+            }
+            , uniqueConstraints: {
+                id: {
+                    name: "id",
+                    fields: ["id"]
+                },
+            }
+            ,
+        }
+        ,
+        passengerTripRequest: {
+            name: 'PassengerTripRequest', fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    isId: true,
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@updatedAt", "args": [] }],
+                }, from: {
+                    name: "from",
+                    type: "String",
+                }, to: {
+                    name: "to",
+                    type: "String",
+                }, departureFrom: {
+                    name: "departureFrom",
+                    type: "DateTime",
+                }, departureTo: {
+                    name: "departureTo",
+                    type: "DateTime",
+                }, seats: {
+                    name: "seats",
+                    type: "Int",
+                    attributes: [{ "name": "@default", "args": [{ "value": 1 }] }],
+                }, status: {
+                    name: "status",
+                    type: "TripRequestStatus",
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, description: {
+                    name: "description",
+                    type: "String",
+                    isOptional: true,
+                }, author: {
+                    name: "author",
+                    type: "User",
+                    isDataModel: true,
+                    backLink: 'tripRequests',
+                    isRelationOwner: true,
+                    foreignKeyMapping: { "id": "authorId" },
+                }, authorId: {
+                    name: "authorId",
+                    type: "String",
+                    attributes: [{ "name": "@default", "args": [] }],
+                    isForeignKey: true,
+                    relationField: 'author',
+                    defaultValueProvider: $default$PassengerTripRequest$authorId,
+                }, requestRules: {
+                    name: "requestRules",
+                    type: "TripRequestRule",
+                    isDataModel: true,
+                    isArray: true,
+                    backLink: 'rideRequest',
                 },
             }
             , uniqueConstraints: {
@@ -491,6 +567,59 @@ const metadata = {
             ,
         }
         ,
+        tripRequestRule: {
+            name: 'TripRequestRule', fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    isId: true,
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@updatedAt", "args": [] }],
+                }, rule: {
+                    name: "rule",
+                    type: "Rule",
+                    isDataModel: true,
+                    backLink: 'ruleRideRequests',
+                    isRelationOwner: true,
+                    foreignKeyMapping: { "id": "ruleId" },
+                }, ruleId: {
+                    name: "ruleId",
+                    type: "String",
+                    isForeignKey: true,
+                    relationField: 'rule',
+                }, rideRequest: {
+                    name: "rideRequest",
+                    type: "PassengerTripRequest",
+                    isDataModel: true,
+                    backLink: 'requestRules',
+                    isRelationOwner: true,
+                    foreignKeyMapping: { "id": "rideRequestId" },
+                }, rideRequestId: {
+                    name: "rideRequestId",
+                    type: "String",
+                    isForeignKey: true,
+                    relationField: 'rideRequest',
+                },
+            }
+            , uniqueConstraints: {
+                id: {
+                    name: "id",
+                    fields: ["id"]
+                }, ruleId_rideRequestId: {
+                    name: "ruleId_rideRequestId",
+                    fields: ["ruleId", "rideRequestId"]
+                },
+            }
+            ,
+        }
+        ,
         rideRule: {
             name: 'RideRule', fields: {
                 id: {
@@ -573,6 +702,12 @@ const metadata = {
                 }, ruleRides: {
                     name: "ruleRides",
                     type: "RideRule",
+                    isDataModel: true,
+                    isArray: true,
+                    backLink: 'rule',
+                }, ruleRideRequests: {
+                    name: "ruleRideRequests",
+                    type: "TripRequestRule",
                     isDataModel: true,
                     isArray: true,
                     backLink: 'rule',
@@ -855,6 +990,10 @@ function $default$DriverVerificationRequest$driverId(user: any): unknown {
 }
 
 function $default$Car$ownerId(user: any): unknown {
+    return user?.id;
+}
+
+function $default$PassengerTripRequest$authorId(user: any): unknown {
     return user?.id;
 }
 

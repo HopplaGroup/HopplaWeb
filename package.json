@@ -1,5 +1,6 @@
 {
 	"dependencies": {
-		"@microsoft/clarity": "^1.0.0"
+		"@microsoft/clarity": "^1.0.0",
+		"zenstack": "^2.22.1"
 	}
 }

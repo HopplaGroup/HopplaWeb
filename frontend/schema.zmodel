@@ -28,6 +28,11 @@ enum UserRole {
   ADMIN
 }
 
+enum TripRequestStatus {
+  ACTIVE
+  CANCELLED
+}
+
 enum RideStatus {
   ACTIVE
   CANCELLED
@@ -103,6 +108,8 @@ model User extends Base {
   driverVerificationRequest DriverVerificationRequest?
 
   ridesAsDriver             Ride[]                     @relation("RideDriver")
+  tripRequests              PassengerTripRequest[] @relation("TripRequestAuthor")
+
   passengerRideRequests     RidePassengerRequest[]
   cars                      Car[]
   userReviewsByMe           UserReview[]               @relation("ReviewAuthor")
@@ -164,7 +171,31 @@ model Car extends Base {
   @@allow('delete', auth() == owner)
 }
 
+model PassengerTripRequest extends Base {
+  from        String     @length(min: 1, max: 50)
+  to          String     @length(min: 1, max: 50)
+  
+  //Departure time range, can be one exact day, if from==to
+  departureFrom   DateTime 
+  departureTo   DateTime
+  
+  seats       Int        @default(1) @gte(1)
+  status      TripRequestStatus @default(ACTIVE)
+  description String?    @length(min: 1, max: 500)
 
+  // Relations
+  author      User              @relation("TripRequestAuthor", fields: [authorId], references: [id])
+  authorId    String            @default(auth().id)
+  
+  requestRules TripRequestRule[]
+
+  @@allow('create', auth() != null)
+  
+  @@allow('read', true)
+  
+  @@allow('update', auth() == author)
+  @@allow('delete', auth() == author)
+}
 
 model Ride extends Base {
   availableSeats        Int
@@ -234,6 +265,21 @@ model RideStartedConfirmation extends Base {
 }
 
 
+model TripRequestRule extends Base {
+  rule          Rule             @relation(fields: [ruleId], references: [id])
+  ruleId        String
+  
+  rideRequest   PassengerTripRequest  @relation(fields: [rideRequestId], references: [id])
+  rideRequestId String
+
+  @@unique([ruleId, rideRequestId])
+
+  @@allow('create', auth() == rideRequest.author)  
+  @@allow('read', true)  
+  @@allow('update', false)  
+  @@allow('delete', auth() == rideRequest.author)
+}
+
 model RideRule extends Base {
   rule   Rule   @relation(fields: [ruleId], references: [id])
   ruleId String
@@ -252,6 +298,7 @@ model Rule extends Base {
   labels    Json       @default('{ "en": "No Smoking", "ka": "არ ვეწევით" }')
   svg       String     @default("")
   ruleRides RideRule[]
+  ruleRideRequests  TripRequestRule[]
 
   @@allow('create', false)
   @@allow('read', true)
