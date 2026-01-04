@@ -15,7 +15,7 @@ import SearchBar from './searchbar';
 import SortBy from './sort-by';
 import { languageTag } from '@/paraglide/runtime';
 import Link from 'next/link';
-import { Stars, Search, MapPin, Calendar, Users } from 'lucide-react';
+import { Stars, Search, MapPin, Calendar, Users, ArrowRight, Bell } from 'lucide-react';
 import * as d from 'date-fns';
 import { defaultSortBy } from '@/lib/constants/search';
 import { useMemo, useState } from 'react';
@@ -192,6 +192,30 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
               )}
             </div>
           )}
+
+          {/* Passenger Post Banner */}
+          <div className="mt-6 relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+            <div className="p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="p-3 rounded-full bg-primary/10 shrink-0">
+                <Bell className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  {m.drab_dull_warthog_bless()}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {m.funny_house_halibut_clap()}
+                </p>
+              </div>
+              <Link
+                href="/request-ride"
+                className="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                {m.away_drab_lemming_trust()}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

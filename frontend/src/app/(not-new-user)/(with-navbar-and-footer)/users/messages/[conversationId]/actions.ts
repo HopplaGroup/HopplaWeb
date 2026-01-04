@@ -65,9 +65,11 @@ export async function sendMessage({ conversationId, content }: SendMessageInput)
 
 type StartConversationInput = {
     otherUserId: string;
+    initialMessage?: string;
+    initialMessageFromOther?: boolean; // If true, the initial message appears to be from otherUserId
 };
 
-export async function startConversation({ otherUserId }: StartConversationInput) {
+export async function startConversation({ otherUserId, initialMessage, initialMessageFromOther }: StartConversationInput) {
     const user = await getUser();
 
     if (!user) {
@@ -89,25 +91,47 @@ export async function startConversation({ otherUserId }: StartConversationInput)
             },
         });
 
+        let conversationId: string;
+
         if (existingConversation) {
-            return { success: true, conversationId: existingConversation.id };
+            conversationId = existingConversation.id;
+        } else {
+            // Create new conversation with both participants
+            const conversation = await db.conversation.create({
+                data: {
+                    participants: {
+                        create: [
+                            { userId: user.id },
+                            { userId: otherUserId },
+                        ],
+                    },
+                },
+            });
+            conversationId = conversation.id;
         }
 
-        // Create new conversation with both participants
-        const conversation = await db.conversation.create({
-            data: {
-                participants: {
-                    create: [
-                        { userId: user.id },
-                        { userId: otherUserId },
-                    ],
+        // If there's an initial message, create it (for both new and existing conversations)
+        if (initialMessage?.trim()) {
+            const senderId = initialMessageFromOther ? otherUserId : user.id;
+            await db.message.create({
+                data: {
+                    content: initialMessage.trim(),
+                    senderId,
+                    conversationId,
                 },
-            },
-        });
+            });
+
+            // Update conversation's updatedAt
+            await db.conversation.update({
+                where: { id: conversationId },
+                data: { updatedAt: new Date() },
+            });
+        }
 
         revalidatePath("/users/messages");
+        revalidatePath(`/users/messages/${conversationId}`);
 
-        return { success: true, conversationId: conversation.id };
+        return { success: true, conversationId };
     } catch (error) {
         console.error("Failed to start conversation:", error);
         return { success: false, error: "Failed to start conversation" };

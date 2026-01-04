@@ -91,6 +91,20 @@ enum ContactSubmissionType {
   FEEDBACK
 }
 
+enum PreferredTimeSlot {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+  ANY
+}
+
+enum PassengerTripRequestStatus {
+  ACTIVE
+  CANCELLED
+  FULFILLED
+}
+
 /// @@deny('all', auth().status == 'BLOCKED')
 /// @@allow('all', auth().role == 'ADMIN')
 /// @@auth
@@ -132,6 +146,7 @@ model User {
   rideStartedConfirmations  RideStartedConfirmation[]
   conversationParticipants  ConversationParticipant[]
   messagesSent              Message[]
+  passengerTripRequests     PassengerTripRequest[]
 
   @@index([email])
   @@index([role])
@@ -367,4 +382,28 @@ model Message {
   conversationId String
 
   @@index([conversationId, createdAt])
+}
+
+/// @@deny('all', auth().status == 'BLOCKED')
+/// @@allow('all', auth().role == 'ADMIN')
+/// @@allow('all', true)
+model PassengerTripRequest {
+  id                String                     @id() @default(cuid())
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt()
+  passenger         User                       @relation(fields: [passengerId], references: [id])
+  passengerId       String
+  /// @length(min: 1, max: 50)
+  from              String
+  /// @length(min: 1, max: 50)
+  to                String
+  departureDateFrom DateTime
+  departureDateTo   DateTime
+  preferredTimeSlot PreferredTimeSlot          @default(ANY)
+  /// @gte(1)
+  seatsNeeded       Int                        @default(1)
+  /// @length(max: 500)
+  description       String?
+  preferences       Json                       @default("[]")
+  status            PassengerTripRequestStatus @default(ACTIVE)
 }

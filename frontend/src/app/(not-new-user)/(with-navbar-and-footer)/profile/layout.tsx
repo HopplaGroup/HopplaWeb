@@ -8,6 +8,7 @@ import {
   Settings,
   ShieldQuestion,
   Ticket,
+  Bell,
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -67,6 +68,12 @@ export default async function ProfileLayout({ children }: LayoutProps) {
       label: m.long_upper_seal_revive(),
       description: m.flat_fresh_duck_bake(),
       href: "/profile/trips",
+    },
+    {
+      icon: <Bell size={22} />,
+      label: m.round_nimble_tern_zap(),
+      description: m.fuzzy_front_canary_strive(),
+      href: "/profile/my-posts",
     },
   ];
 

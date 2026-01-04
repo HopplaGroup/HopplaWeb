@@ -123,6 +123,8 @@ model User extends Base {
 
   conversationParticipants  ConversationParticipant[]
   messagesSent              Message[]
+
+  passengerTripRequests     PassengerTripRequest[]
 }
 
 model DriverVerificationRequest extends Base {
@@ -337,6 +339,41 @@ model Message extends Base {
   conversationId String
 
   @@index([conversationId, createdAt])
+
+  @@allow('all', true)
+}
+
+enum PreferredTimeSlot {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+  ANY
+}
+
+enum PassengerTripRequestStatus {
+  ACTIVE
+  CANCELLED
+  FULFILLED
+}
+
+model PassengerTripRequest extends Base {
+  passenger         User                       @relation(fields: [passengerId], references: [id])
+  passengerId       String                     @default(auth().id)
+
+  from              String                     @length(min: 1, max: 50)
+  to                String                     @length(min: 1, max: 50)
+
+  departureDateFrom DateTime
+  departureDateTo   DateTime
+
+  preferredTimeSlot PreferredTimeSlot          @default(ANY)
+  seatsNeeded       Int                        @default(1) @gte(1)
+
+  description       String?                    @length(max: 500)
+  preferences       Json                       @default("[]")
+
+  status            PassengerTripRequestStatus @default(ACTIVE)
 
   @@allow('all', true)
 }

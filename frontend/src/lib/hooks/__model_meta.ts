@@ -123,6 +123,12 @@ const metadata = {
                     isDataModel: true,
                     isArray: true,
                     backLink: 'sender',
+                }, passengerTripRequests: {
+                    name: "passengerTripRequests",
+                    type: "PassengerTripRequest",
+                    isDataModel: true,
+                    isArray: true,
+                    backLink: 'passenger',
                 },
             }
             , uniqueConstraints: {
@@ -842,6 +848,78 @@ const metadata = {
             ,
         }
         ,
+        passengerTripRequest: {
+            name: 'PassengerTripRequest', fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    isId: true,
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    attributes: [{ "name": "@updatedAt", "args": [] }],
+                }, passenger: {
+                    name: "passenger",
+                    type: "User",
+                    isDataModel: true,
+                    backLink: 'passengerTripRequests',
+                    isRelationOwner: true,
+                    foreignKeyMapping: { "id": "passengerId" },
+                }, passengerId: {
+                    name: "passengerId",
+                    type: "String",
+                    attributes: [{ "name": "@default", "args": [] }],
+                    isForeignKey: true,
+                    relationField: 'passenger',
+                    defaultValueProvider: $default$PassengerTripRequest$passengerId,
+                }, from: {
+                    name: "from",
+                    type: "String",
+                }, to: {
+                    name: "to",
+                    type: "String",
+                }, departureDateFrom: {
+                    name: "departureDateFrom",
+                    type: "DateTime",
+                }, departureDateTo: {
+                    name: "departureDateTo",
+                    type: "DateTime",
+                }, preferredTimeSlot: {
+                    name: "preferredTimeSlot",
+                    type: "PreferredTimeSlot",
+                    attributes: [{ "name": "@default", "args": [] }],
+                }, seatsNeeded: {
+                    name: "seatsNeeded",
+                    type: "Int",
+                    attributes: [{ "name": "@default", "args": [{ "value": 1 }] }],
+                }, description: {
+                    name: "description",
+                    type: "String",
+                    isOptional: true,
+                }, preferences: {
+                    name: "preferences",
+                    type: "Json",
+                    attributes: [{ "name": "@default", "args": [{ "value": "[]" }] }],
+                }, status: {
+                    name: "status",
+                    type: "PassengerTripRequestStatus",
+                    attributes: [{ "name": "@default", "args": [] }],
+                },
+            }
+            , uniqueConstraints: {
+                id: {
+                    name: "id",
+                    fields: ["id"]
+                },
+            }
+            ,
+        }
+        ,
     }
     ,
     deleteCascade: {
@@ -879,6 +957,10 @@ function $default$ConversationParticipant$userId(user: any): unknown {
 }
 
 function $default$Message$senderId(user: any): unknown {
+    return user?.id;
+}
+
+function $default$PassengerTripRequest$passengerId(user: any): unknown {
     return user?.id;
 }
 export default metadata;

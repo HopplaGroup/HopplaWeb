@@ -13,6 +13,8 @@ import {
     Ticket,
     UserIcon,
     X,
+    Bell,
+    FileText,
 } from "lucide-react";
 import * as m from "@/paraglide/messages.js";
 import { Prisma } from "@prisma/client";
@@ -40,6 +42,12 @@ export default function Sidebar({
             icon: Plus,
             requiresAuth: true,
         },
+        {
+            href: "/request-ride",
+            label: m.spry_neat_swan_link(),
+            icon: Bell,
+            requiresAuth: true,
+        },
         { href: "/about", label: m.tense_every_swallow_clap(), icon: Info },
         { href: "/contact", label: m.round_sour_gazelle_peel(), icon: Phone },
         {
@@ -64,6 +72,12 @@ export default function Sidebar({
             href: "/profile/rides",
             label: m.candid_silly_stingray_tear(),
             icon: Milestone,
+            requiresAuth: true,
+        },
+        {
+            href: "/profile/my-posts",
+            label: m.round_nimble_tern_zap(),
+            icon: FileText,
             requiresAuth: true,
         },
     ];

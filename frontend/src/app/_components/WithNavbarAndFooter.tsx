@@ -1,6 +1,7 @@
 import { getUser } from '@/lib/utils/auth';
 import FooterWrapper from './FooterWrapper';
 import WholeNavigation from './WholeNavigation';
+import { CreatePostBanner } from '../(not-new-user)/(with-navbar-and-footer)/_components/CreatePostBanner';
 
 export default async function WithNavbarAndFooter({
   children,
@@ -18,6 +19,7 @@ export default async function WithNavbarAndFooter({
   return (
     <div className="grid grid-rows-[auto_1fr_auto] grid-cols-1 min-h-screen">
       <header>
+        <CreatePostBanner />
         <WholeNavigation user={user} />
       </header>
       <main className="md:mt-20 mb-10">{children}</main>
