@@ -41,8 +41,8 @@ export default async function PassengerPostsSection() {
   }));
 
   return (
-    <section className="py-16 overflow-hidden">
-      <div className="container mb-8">
+    <section className="py-16">
+      <div className="container mb-8 relative z-0">
         <div className="text-center">
           <span className="inline-block px-3 py-1 text-sm font-medium text-primary bg-primary/10 rounded-full mb-3">
             {m.next_light_shad_glow()}

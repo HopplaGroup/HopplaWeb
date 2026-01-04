@@ -8,7 +8,7 @@ import { ka, enUS } from "date-fns/locale";
 import { Calendar, Clock, Users, ArrowRight, User, ChevronRight, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState, useEffect, useTransition } from "react";
+import { useRef, useState, useEffect, useTransition, useCallback } from "react";
 import { useUser } from "@/lib/providers/UserProvider";
 import { useRouter } from "next/navigation";
 import { startConversation } from "../users/messages/[conversationId]/actions";
@@ -101,62 +101,69 @@ export function PassengerPostsCarousel({ posts }: Props) {
     });
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        setCanScrollLeft(scrollLeft > 0);
-        setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-      }
-    };
+  const updateScrollState = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
     
-    handleScroll();
-    const scrollEl = scrollRef.current;
-    if (scrollEl) {
-      scrollEl.addEventListener("scroll", handleScroll);
-      return () => scrollEl.removeEventListener("scroll", handleScroll);
-    }
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
   }, []);
 
-  const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 340, behavior: "smooth" });
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    // Initial check
+    updateScrollState();
+    
+    // Listen to scroll events
+    el.addEventListener("scroll", updateScrollState);
+    
+    // Also listen to scrollend for when smooth scroll finishes
+    el.addEventListener("scrollend", updateScrollState);
+    
+    // Listen to resize events
+    const resizeObserver = new ResizeObserver(updateScrollState);
+    resizeObserver.observe(el);
+    
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      el.removeEventListener("scrollend", updateScrollState);
+      resizeObserver.disconnect();
+    };
+  }, [updateScrollState]);
+
+  const scroll = (direction: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    
+    const cardWidth = 320 + 16; // card width + gap
+    const currentScroll = el.scrollLeft;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    
+    let newScroll: number;
+    if (direction === "right") {
+      newScroll = Math.min(currentScroll + cardWidth, maxScroll);
+    } else {
+      newScroll = Math.max(currentScroll - cardWidth, 0);
     }
+    
+    // Optimistically update state based on target position
+    setCanScrollLeft(newScroll > 5);
+    setCanScrollRight(newScroll + el.clientWidth < el.scrollWidth - 5);
+    
+    el.scrollTo({ left: newScroll, behavior: "smooth" });
+    
+    // Fallback: update state after scroll animation (for browsers without scrollend)
+    setTimeout(updateScrollState, 350);
   };
 
-  const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -340, behavior: "smooth" });
-    }
-  };
+  // Check if scrolling is possible at all
+  const hasOverflow = posts.length > 0;
 
   return (
-    <div className="relative group">
-      {/* Left scroll button */}
-      {canScrollLeft && (
-        <button
-          type="button"
-          onClick={scrollLeft}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 size-10 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all opacity-0 group-hover:opacity-100"
-          aria-label="Scroll left"
-        >
-          <ChevronRight className="size-5 rotate-180" />
-        </button>
-      )}
-
-      {/* Right scroll button with indicator */}
-      {canScrollRight && (
-        <button
-          type="button"
-          onClick={scrollRight}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 size-10 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all animate-pulse-subtle"
-          aria-label="Scroll right"
-        >
-          <ChevronRight className="size-5" />
-        </button>
-      )}
-
-
+    <div className="relative isolate">
       {/* Scrolling container */}
       <div
         ref={scrollRef}
@@ -166,15 +173,14 @@ export function PassengerPostsCarousel({ posts }: Props) {
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
           {posts.map((post) => (
-            <Link
+            <div
               key={post.id}
-              href={`/users/${post.passenger.id}`}
-              className="flex-shrink-0 w-[320px] group/card"
+              className="flex-shrink-0 w-[320px]"
             >
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4 h-full transition-all duration-200 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 flex flex-col">
-              {/* User Info */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4 h-full flex flex-col">
+              {/* User Info - Only this part is clickable */}
               <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
-                <div className="relative">
+                <Link href={`/users/${post.passenger.id}`} className="relative hover:opacity-80 transition-opacity">
                   {post.passenger.profileImg ? (
                     <Image
                       src={post.passenger.profileImg}
@@ -189,11 +195,13 @@ export function PassengerPostsCarousel({ posts }: Props) {
                     </div>
                   )}
                   <span className="absolute -bottom-0.5 -right-0.5 size-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
-                </div>
+                </Link>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                    {post.passenger.name}
-                  </p>
+                  <Link href={`/users/${post.passenger.id}`} className="hover:underline">
+                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {post.passenger.name}
+                    </p>
+                  </Link>
                   <p className="text-xs text-primary font-medium">
                     {lang === "ka" ? "მგზავრობას ეძებს" : "Looking for a ride"}
                   </p>
@@ -274,24 +282,39 @@ export function PassengerPostsCarousel({ posts }: Props) {
                 </button>
               )}
             </div>
-          </Link>
+          </div>
           ))}
       </div>
 
+      {/* Left scroll button - placed after scroll container to be on top */}
+      {hasOverflow && canScrollLeft && (
+        <div className="absolute left-2 top-0 bottom-0 flex items-center pointer-events-none">
+          <button
+            type="button"
+            onClick={() => scroll("left")}
+            className="size-10 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 pointer-events-auto"
+            aria-label="Scroll left"
+          >
+            <ChevronRight className="size-5 rotate-180" />
+          </button>
+        </div>
+      )}
+
+      {/* Right scroll button */}
+      {hasOverflow && canScrollRight && (
+        <div className="absolute right-2 top-0 bottom-0 flex items-center pointer-events-none">
+          <button
+            type="button"
+            onClick={() => scroll("right")}
+            className="size-10 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 pointer-events-auto"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="size-5" />
+          </button>
+        </div>
+      )}
+
       <style jsx>{`
-        @keyframes pulse-subtle {
-          0%, 100% {
-            transform: translateY(-50%) scale(1);
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-          }
-          50% {
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-          }
-        }
-        .animate-pulse-subtle {
-          animation: pulse-subtle 2s ease-in-out infinite;
-        }
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
