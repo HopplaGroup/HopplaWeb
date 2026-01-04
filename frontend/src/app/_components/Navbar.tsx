@@ -9,7 +9,7 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import AuthBlock from "./AuthBlock";
 import MessagesNavItem from "./MessagesNavItem";
 
-const BANNER_DISMISSED_KEY = "create-post-banner-dismissed";
+
 
 export default function Navbar({
     user,
@@ -23,21 +23,8 @@ export default function Navbar({
     isSidebarOpened: boolean;
 }) {
     const [scrolled, setScrolled] = useState(false);
-    const [showBanner, setShowBanner] = useState(false);
 
-    useEffect(() => {
-        const dismissed = localStorage.getItem(BANNER_DISMISSED_KEY);
-        // Show banner only if user is logged in and hasn't dismissed
-        setShowBanner(user !== null && dismissed !== "true");
-        
-        // Listen for storage changes (when banner is dismissed)
-        const handleStorage = () => {
-            const dismissed = localStorage.getItem(BANNER_DISMISSED_KEY);
-            setShowBanner(user !== null && dismissed !== "true");
-        };
-        window.addEventListener("storage", handleStorage);
-        return () => window.removeEventListener("storage", handleStorage);
-    }, [user]);
+
 
     const NAV_ITEMS = [
         { href: "/", label: m.lofty_nimble_goat_succeed(), icon: Home },
@@ -62,7 +49,7 @@ export default function Navbar({
         <nav
             className={`left-0 right-0 w-screen fixed z-[100] transition-all ${
                 scrolled ? "bg-white shadow-md" : "bg-white"
-            } ${showBanner ? "top-10" : "top-0"}`}
+            }`}
         >
             <div className="container">
                 <div className="flex h-16 md:h-20 items-center justify-between">
