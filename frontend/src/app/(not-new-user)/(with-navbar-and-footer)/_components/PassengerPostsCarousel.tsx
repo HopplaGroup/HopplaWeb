@@ -179,56 +179,56 @@ export function PassengerPostsCarousel({ posts }: Props) {
             >
             <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-200 group h-full flex flex-col shadow-sm hover:shadow-md">
               <div className="p-4 flex flex-col flex-1">
-                {/* Header Section */}
+                {/* Top Section - Route on Left, Date/Passengers on Right */}
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
+                  {/* Route Section - Top Left */}
+                  <div className="flex-1 pr-2">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-8 h-5 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                          <MapPin className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
+                            {getPlaceName(post.from)}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-3.5">
+                        <div className="w-px h-2.5 bg-gray-300 dark:bg-gray-600"></div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center w-8 h-5 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                          <MapPin className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
+                            {getPlaceName(post.to)}
+                          </h3>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Date and Passengers - Top Right */}
+                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
                     <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-primary/10 rounded-lg border border-primary/20">
-                      <span className="text-sm font-medium text-primary">
+                      <span className="text-sm font-medium text-primary whitespace-nowrap">
                         {format(new Date(post.departureDateFrom), "d MMM", { locale })}
                         {post.departureDateFrom !== post.departureDateTo && (
                           <span className="text-primary/70"> - {format(new Date(post.departureDateTo), "d MMM", { locale })}</span>
                         )}
                       </span>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                    <Users className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" />
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                      {post.seatsNeeded}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Route Section */}
-                <div className="mb-3">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex items-center justify-center w-9 h-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                        <MapPin className="w-3 h-3 text-gray-600 dark:text-gray-400" />
-                      </div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-                          {getPlaceName(post.from)}
-                        </h3>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 ml-4">
-                      <div className="w-px h-3 bg-gray-300 dark:bg-gray-600"></div>
-                    </div>
-
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex items-center justify-center w-9 h-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                        <MapPin className="w-3 h-3 text-gray-600 dark:text-gray-400" />
-                      </div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-                          {getPlaceName(post.to)}
-                        </h3>
-                      </div>
+                    <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                      <Users className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" />
+                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        {post.seatsNeeded}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -306,7 +306,24 @@ export function PassengerPostsCarousel({ posts }: Props) {
                 </div>
 
                 {/* Message Button */}
-                {currentUser && currentUser.id !== post.passenger.id && (
+                {!currentUser ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-semibold cursor-not-allowed"
+                  >
+                    <MessageCircle className="size-4" />
+                    {lang === "ka" ? "შედით სისტემაში" : "Login to message"}
+                  </button>
+                ) : currentUser.id === post.passenger.id ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-semibold cursor-not-allowed"
+                  >
+                    {lang === "ka" ? "თქვენი პოსტი" : "Your post"}
+                  </button>
+                ) : (
                   <button
                     type="button"
                     onClick={(e) => handleMessage(e, post)}
