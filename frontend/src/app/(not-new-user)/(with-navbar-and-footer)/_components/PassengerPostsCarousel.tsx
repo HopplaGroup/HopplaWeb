@@ -105,6 +105,13 @@ export function PassengerPostsCarousel({ posts }: Props) {
     const el = scrollRef.current;
     if (!el) return;
     
+    // Only update scroll state on desktop (md and above)
+    if (window.innerWidth < 768) {
+      setCanScrollLeft(false);
+      setCanScrollRight(false);
+      return;
+    }
+    
     const { scrollLeft, scrollWidth, clientWidth } = el;
     setCanScrollLeft(scrollLeft > 5);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
@@ -138,7 +145,10 @@ export function PassengerPostsCarousel({ posts }: Props) {
     const el = scrollRef.current;
     if (!el) return;
     
-    const cardWidth = 340 + 16; // card width + gap
+    // Get the first card element to calculate its width dynamically
+    const firstCard = el.querySelector('[data-card]') as HTMLElement;
+    const gap = window.innerWidth >= 640 ? 16 : 12; // gap-3 (12px) on mobile, gap-4 (16px) on larger screens
+    const cardWidth = firstCard ? firstCard.offsetWidth + gap : 340 + 16; // card width + gap (fallback to 340px)
     const currentScroll = el.scrollLeft;
     const maxScroll = el.scrollWidth - el.clientWidth;
     
@@ -151,7 +161,7 @@ export function PassengerPostsCarousel({ posts }: Props) {
     
     // Optimistically update state based on target position
     setCanScrollLeft(newScroll > 5);
-    setCanScrollRight(newScroll + el.clientWidth < el.scrollWidth - 5);
+    setCanScrollRight(newScroll + el.clientWidth < maxScroll - 5);
     
     el.scrollTo({ left: newScroll, behavior: "smooth" });
     
@@ -164,21 +174,22 @@ export function PassengerPostsCarousel({ posts }: Props) {
 
   return (
     <div className="relative isolate">
-      {/* Scrolling container */}
+      {/* Mobile: Vertical Stack | Desktop: Horizontal Carousel */}
       <div
         ref={scrollRef}
-        className={`flex gap-4 py-4 px-[max(1rem,calc((100vw-1280px)/2+1rem))] overflow-x-auto scrollbar-hide scroll-smooth ${
-          posts.length <= 3 ? "justify-center" : ""
+        className={`flex flex-col md:flex-row gap-4 py-4 px-4 md:px-[max(1rem,calc((100vw-1280px)/2+1rem))] md:overflow-x-auto scrollbar-hide md:scroll-smooth ${
+          posts.length <= 3 ? "md:justify-center" : ""
         }`}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
           {posts.map((post) => (
             <div
               key={post.id}
-              className="flex-shrink-0 w-[340px]"
+              data-card
+              className="w-full md:flex-shrink-0 md:w-[320px] lg:w-[340px]"
             >
             <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-200 group h-full flex flex-col shadow-sm hover:shadow-md">
-              <div className="p-4 flex flex-col flex-1">
+              <div className="p-3 sm:p-4 flex flex-col flex-1">
                 {/* Top Section - Route on Left, Date/Passengers on Right */}
                 <div className="flex items-start justify-between mb-3">
                   {/* Route Section - Top Left */}
@@ -215,18 +226,18 @@ export function PassengerPostsCarousel({ posts }: Props) {
                   </div>
 
                   {/* Date and Passengers - Top Right */}
-                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-primary/10 rounded-lg border border-primary/20">
-                      <span className="text-sm font-medium text-primary whitespace-nowrap">
+                  <div className="flex flex-col items-end gap-1.5 sm:gap-2 flex-shrink-0">
+                    <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-0.5 sm:py-1 bg-primary/10 rounded-lg border border-primary/20">
+                      <span className="text-xs sm:text-sm font-medium text-primary whitespace-nowrap">
                         {format(new Date(post.departureDateFrom), "d MMM", { locale })}
                         {post.departureDateFrom !== post.departureDateTo && (
-                          <span className="text-primary/70"> - {format(new Date(post.departureDateTo), "d MMM", { locale })}</span>
+                          <span className="text-primary/70 hidden sm:inline"> - {format(new Date(post.departureDateTo), "d MMM", { locale })}</span>
                         )}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                      <Users className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                      <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-600 dark:text-gray-400" />
+                      <span className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200">
                         {post.seatsNeeded}
                       </span>
                     </div>
@@ -342,9 +353,9 @@ export function PassengerPostsCarousel({ posts }: Props) {
           ))}
       </div>
 
-      {/* Left scroll button - placed after scroll container to be on top */}
+      {/* Left scroll button - hidden on mobile, shown on desktop */}
       {hasOverflow && canScrollLeft && (
-        <div className="absolute left-2 top-0 bottom-0 flex items-center pointer-events-none">
+        <div className="hidden md:flex absolute left-2 top-0 bottom-0 items-center pointer-events-none">
           <button
             type="button"
             onClick={() => scroll("left")}
@@ -356,9 +367,9 @@ export function PassengerPostsCarousel({ posts }: Props) {
         </div>
       )}
 
-      {/* Right scroll button */}
+      {/* Right scroll button - hidden on mobile, shown on desktop */}
       {hasOverflow && canScrollRight && (
-        <div className="absolute right-2 top-0 bottom-0 flex items-center pointer-events-none">
+        <div className="hidden md:flex absolute right-2 top-0 bottom-0 items-center pointer-events-none">
           <button
             type="button"
             onClick={() => scroll("right")}

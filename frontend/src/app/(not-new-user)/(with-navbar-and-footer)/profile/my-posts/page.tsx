@@ -1,7 +1,6 @@
 "use client";
 
 import { useFindManyPassengerTripRequest, useUpdatePassengerTripRequest } from "@/lib/hooks";
-import { useUser } from "@/lib/providers/UserProvider";
 import { languageTag } from "@/paraglide/runtime";
 import PLACES from "@/lib/constants/places";
 import { PASSENGER_PREFERENCES } from "@/lib/constants/passenger-preferences";
@@ -74,12 +73,8 @@ const STATUS_CONFIG = {
 export default function MyPostsPage() {
   const lang = languageTag();
   const locale = lang === "ka" ? ka : enUS;
-  const { user: currentUser } = useUser();
 
   const { data: posts, isLoading, refetch } = useFindManyPassengerTripRequest({
-    where: {
-      passengerId: currentUser?.id,
-    },
     orderBy: { createdAt: "desc" },
     include: { passenger: true },
   });
