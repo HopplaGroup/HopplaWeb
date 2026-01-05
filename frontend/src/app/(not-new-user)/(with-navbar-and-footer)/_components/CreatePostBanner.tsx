@@ -58,7 +58,7 @@ export function CreatePostBanner() {
       </div>
 
       {/* Desktop: Fixed at very top */}
-      <div className="hidden md:block fixed top-16 md:top-20 left-0 right-0 z-[101] bg-primary text-white">
+      <div className="hidden md:block bg-primary text-white md:mt-20 md:mb-[-80px]">
         <div className="container py-2 px-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Bell className="size-4 flex-shrink-0" />

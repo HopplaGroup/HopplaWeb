@@ -19,7 +19,6 @@ export default async function WithNavbarAndFooter({
   return (
     <div className="grid grid-rows-[auto_1fr_auto] grid-cols-1 min-h-screen">
       <header>
-        <CreatePostBanner />
         <WholeNavigation user={user} />
       </header>
       <main className="md:mt-20 mb-10">{children}</main>

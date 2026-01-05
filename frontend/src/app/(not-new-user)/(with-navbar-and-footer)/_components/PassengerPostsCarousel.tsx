@@ -5,7 +5,7 @@ import PLACES from "@/lib/constants/places";
 import { PASSENGER_PREFERENCES } from "@/lib/constants/passenger-preferences";
 import { format } from "date-fns";
 import { ka, enUS } from "date-fns/locale";
-import { Calendar, Clock, Users, ArrowRight, User, ChevronRight, MessageCircle } from "lucide-react";
+import { Calendar, Clock, Users, ArrowRight, User, ChevronRight, MessageCircle, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useEffect, useTransition, useCallback } from "react";
@@ -138,7 +138,7 @@ export function PassengerPostsCarousel({ posts }: Props) {
     const el = scrollRef.current;
     if (!el) return;
     
-    const cardWidth = 320 + 16; // card width + gap
+    const cardWidth = 340 + 16; // card width + gap
     const currentScroll = el.scrollLeft;
     const maxScroll = el.scrollWidth - el.clientWidth;
     
@@ -175,112 +175,151 @@ export function PassengerPostsCarousel({ posts }: Props) {
           {posts.map((post) => (
             <div
               key={post.id}
-              className="flex-shrink-0 w-[320px]"
+              className="flex-shrink-0 w-[340px]"
             >
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4 h-full flex flex-col">
-              {/* User Info - Only this part is clickable */}
-              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
-                <Link href={`/users/${post.passenger.id}`} className="relative hover:opacity-80 transition-opacity">
-                  {post.passenger.profileImg ? (
-                    <Image
-                      src={post.passenger.profileImg}
-                      alt={post.passenger.name}
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="size-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <User className="size-5 text-gray-400" />
-                    </div>
-                  )}
-                  <span className="absolute -bottom-0.5 -right-0.5 size-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
-                </Link>
-                <div className="flex-1 min-w-0">
-                  <Link href={`/users/${post.passenger.id}`} className="hover:underline">
-                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {post.passenger.name}
-                    </p>
-                  </Link>
-                  <p className="text-xs text-primary font-medium">
-                    {lang === "ka" ? "მგზავრობას ეძებს" : "Looking for a ride"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Route */}
-              <div className="flex items-center gap-2 mb-3">
-                <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                  {getPlaceName(post.from)}
-                </span>
-                <ArrowRight className="size-4 text-gray-400 flex-shrink-0" />
-                <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                  {getPlaceName(post.to)}
-                </span>
-              </div>
-
-              {/* Info */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                <div className="inline-flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-md text-xs text-gray-600 dark:text-gray-300">
-                  <Calendar className="size-3" />
-                  <span>
-                    {format(new Date(post.departureDateFrom), "d MMM", { locale })}
-                    {post.departureDateFrom !== post.departureDateTo && (
-                      <span className="text-gray-400"> - {format(new Date(post.departureDateTo), "d MMM", { locale })}</span>
-                    )}
-                  </span>
-                </div>
-                <div className="inline-flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-md text-xs text-gray-600 dark:text-gray-300">
-                  <Clock className="size-3" />
-                  <span>{TIME_SLOT_LABELS[post.preferredTimeSlot as keyof typeof TIME_SLOT_LABELS]?.[lang] || post.preferredTimeSlot}</span>
-                </div>
-                <div className="inline-flex items-center gap-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded-md text-xs text-gray-600 dark:text-gray-300">
-                  <Users className="size-3" />
-                  <span>{post.seatsNeeded}</span>
-                </div>
-              </div>
-
-              {/* Preferences */}
-              {post.preferences && post.preferences.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {post.preferences.slice(0, 3).map((pref) => {
-                    const prefConfig = PASSENGER_PREFERENCES.find((p) => p.id === pref.id);
-                    return (
-                      <div
-                        key={pref.id}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/5 dark:bg-primary/10 rounded-full text-[10px] text-primary font-medium"
-                      >
-                        {prefConfig && (
-                          <span className="size-3 flex items-center justify-center [&>svg]:size-3">
-                            {prefConfig.icon}
-                          </span>
+            <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-200 group h-full flex flex-col shadow-sm hover:shadow-md">
+              <div className="p-4 flex flex-col flex-1">
+                {/* Header Section */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-primary/10 rounded-lg border border-primary/20">
+                      <span className="text-sm font-medium text-primary">
+                        {format(new Date(post.departureDateFrom), "d MMM", { locale })}
+                        {post.departureDateFrom !== post.departureDateTo && (
+                          <span className="text-primary/70"> - {format(new Date(post.departureDateTo), "d MMM", { locale })}</span>
                         )}
-                        <span className="truncate max-w-[80px]">{lang === "ka" ? pref.ka : pref.en}</span>
-                      </div>
-                    );
-                  })}
-                  {post.preferences.length > 3 && (
-                    <span className="text-[10px] text-gray-400 px-1">
-                      +{post.preferences.length - 3}
-                    </span>
-                  )}
-                </div>
-              )}
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Message Button */}
-              {currentUser && currentUser.id !== post.passenger.id && (
-                <button
-                  type="button"
-                  onClick={(e) => handleMessage(e, post)}
-                  disabled={isPending && pendingUserId === post.passenger.id}
-                  className="w-full mt-auto pt-3 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                >
-                  <MessageCircle className="size-4" />
-                  {isPending && pendingUserId === post.passenger.id
-                    ? (lang === "ka" ? "იტვირთება..." : "Loading...")
-                    : (lang === "ka" ? "მიწერე" : "Message")}
-                </button>
-              )}
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <Users className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" />
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                      {post.seatsNeeded}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Route Section */}
+                <div className="mb-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex items-center justify-center w-9 h-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        <MapPin className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                      </div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                          {getPlaceName(post.from)}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 ml-4">
+                      <div className="w-px h-3 bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex items-center justify-center w-9 h-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        <MapPin className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                      </div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                          {getPlaceName(post.to)}
+                        </h3>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Time Slot Badge */}
+                <div className="mb-3">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <Clock className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {TIME_SLOT_LABELS[post.preferredTimeSlot as keyof typeof TIME_SLOT_LABELS]?.[lang] || post.preferredTimeSlot}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Preferences */}
+                {post.preferences && post.preferences.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {post.preferences.slice(0, 3).map((pref) => {
+                      const prefConfig = PASSENGER_PREFERENCES.find((p) => p.id === pref.id);
+                      return (
+                        <div
+                          key={pref.id}
+                          className="flex items-center justify-center w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-lg group-hover:bg-gray-200 dark:group-hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                        >
+                          {prefConfig && (
+                            <span className="w-3.5 h-3.5 flex items-center justify-center text-gray-600 dark:text-gray-400">
+                              {prefConfig.icon}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {post.preferences.length > 3 && (
+                      <div className="flex items-center justify-center w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                          +{post.preferences.length - 3}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Passenger Info Section */}
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-3 mt-auto">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <Link href={`/users/${post.passenger.id}`} className="relative hover:opacity-80 transition-opacity">
+                        {post.passenger.profileImg ? (
+                          <Image
+                            src={post.passenger.profileImg}
+                            alt={post.passenger.name}
+                            width={36}
+                            height={36}
+                            className="rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                          />
+                        ) : (
+                          <div className="size-9 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center border-2 border-gray-200 dark:border-gray-700">
+                            <User className="size-4 text-gray-400" />
+                          </div>
+                        )}
+                        <span className="absolute -bottom-0.5 -right-0.5 size-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
+                      </Link>
+                      <div>
+                        <Link href={`/users/${post.passenger.id}`} className="hover:underline">
+                          <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+                            {post.passenger.name.split(' ')[0]}
+                          </p>
+                        </Link>
+                        <p className="text-xs text-primary font-medium">
+                          {lang === "ka" ? "მგზავრობას ეძებს" : "Looking for a ride"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Message Button */}
+                {currentUser && currentUser.id !== post.passenger.id && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleMessage(e, post)}
+                    disabled={isPending && pendingUserId === post.passenger.id}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 shadow-sm hover:shadow-md"
+                  >
+                    <MessageCircle className="size-4" />
+                    {isPending && pendingUserId === post.passenger.id
+                      ? (lang === "ka" ? "იტვირთება..." : "Loading...")
+                      : (lang === "ka" ? "მიწერე" : "Message")}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           ))}
