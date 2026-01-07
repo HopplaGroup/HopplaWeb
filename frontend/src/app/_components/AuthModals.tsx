@@ -20,6 +20,7 @@ interface AuthModalProps {
   onClose: () => void;
   mode: 'login' | 'register';
   onSwitchMode?: () => void;
+  customSubheader?: string;
 }
 
 export function AuthModal({
@@ -27,6 +28,7 @@ export function AuthModal({
   onClose,
   mode,
   onSwitchMode,
+  customSubheader,
 }: AuthModalProps) {
     const router = useRouter();
     const [email, setEmail] = useState('');
@@ -95,11 +97,10 @@ export function AuthModal({
             )}
           </DialogTitle>
           <DialogDescription className="text-center text-sm sm:text-base transition-all duration-200">
-            {mode === 'login'
+            {customSubheader || (mode === 'login'
               ? m.born_muddy_halibut_talk()
-              : m.ideal_lime_impala_view()
-          
-                }    </DialogDescription>
+              : m.ideal_lime_impala_view())}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 sm:space-y-4 py-2 sm:py-4 transition-all duration-200">

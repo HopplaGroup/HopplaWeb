@@ -3,27 +3,55 @@
 import { useUser } from "@/lib/providers/UserProvider";
 import { languageTag } from "@/paraglide/runtime";
 import { X, Bell } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { AuthModal } from "@/app/_components/AuthModals";
 
 const BANNER_DISMISSED_KEY = "create-post-banner-dismissed";
 
 export function CreatePostBanner() {
   const { user } = useUser();
   const lang = languageTag();
+  const router = useRouter();
   const [isDismissed, setIsDismissed] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   useEffect(() => {
     const dismissed = localStorage.getItem(BANNER_DISMISSED_KEY);
     setIsDismissed(dismissed === "true");
   }, []);
 
+  // Check if user just logged in and redirect to request-ride
+  useEffect(() => {
+    if (user) {
+      const redirectUrl = sessionStorage.getItem("post_login_redirect");
+      if (redirectUrl) {
+        sessionStorage.removeItem("post_login_redirect");
+        router.push(redirectUrl);
+      }
+    }
+  }, [user, router]);
+
   const handleDismiss = () => {
     setIsDismissed(true);
     localStorage.setItem(BANNER_DISMISSED_KEY, "true");
   };
 
-  if (!user || isDismissed) return null;
+  const handleCreatePostClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (user) {
+      // User is logged in, go directly to request-ride page
+      router.push("/request-ride");
+    } else {
+      // User is not logged in, store return URL and show login modal
+      sessionStorage.setItem("post_login_redirect", "/request-ride");
+      setAuthMode('login');
+      setIsAuthModalOpen(true);
+    }
+  };
+
+  if (isDismissed) return null;
 
   return (
     <>
@@ -39,12 +67,12 @@ export function CreatePostBanner() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Link
-              href="/request-ride"
+            <button
+              onClick={handleCreatePostClick}
               className="text-sm font-medium px-3 py-1 bg-white/20 hover:bg-white/30 rounded-md transition-colors whitespace-nowrap"
             >
               {lang === "ka" ? "პოსტის შექმნა" : "Create Post"}
-            </Link>
+            </button>
             <button
               type="button"
               onClick={handleDismiss}
@@ -58,7 +86,7 @@ export function CreatePostBanner() {
       </div>
 
       {/* Desktop: Fixed at very top */}
-      <div className="hidden md:block fixed top-16 md:top-20 left-0 right-0 z-[101] bg-primary text-white">
+      <div className="hidden md:block bg-primary text-white md:mt-20 md:mb-[-80px]">
         <div className="container py-2 px-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Bell className="size-4 flex-shrink-0" />
@@ -69,12 +97,12 @@ export function CreatePostBanner() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Link
-              href="/request-ride"
+            <button
+              onClick={handleCreatePostClick}
               className="text-sm font-medium px-3 py-1 bg-white/20 hover:bg-white/30 rounded-md transition-colors whitespace-nowrap"
             >
               {lang === "ka" ? "პოსტის შექმნა" : "Create Post"}
-            </Link>
+            </button>
             <button
               type="button"
               onClick={handleDismiss}
@@ -87,6 +115,14 @@ export function CreatePostBanner() {
         </div>
       </div>
 
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        mode={authMode}
+        onSwitchMode={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+        customSubheader={lang === "ka" ? "დასაპოსტად შედით სისტემაში" : "Login to create a post"}
+      />
     </>
   );
 }

@@ -3,12 +3,14 @@ import { PassengerPostsCarousel } from "./PassengerPostsCarousel";
 import * as m from "@/paraglide/messages.js";
 
 export default async function PassengerPostsSection() {
+  // Fetch ALL active passenger trip requests (not filtered by user)
   const posts = await db.passengerTripRequest.findMany({
     where: {
       status: "ACTIVE",
       departureDateTo: {
         gte: new Date(),
       },
+      // No passengerId filter - should return posts from all users
     },
     include: {
       passenger: {
@@ -24,6 +26,10 @@ export default async function PassengerPostsSection() {
     },
     take: 20,
   });
+
+  // Debug: Log the number of posts and passenger IDs
+  console.log("PassengerPostsSection - Total posts found:", posts?.length);
+  console.log("PassengerPostsSection - Passenger IDs:", posts?.map(p => p.passengerId));
 
   if (!posts || posts.length === 0) return null;
 
