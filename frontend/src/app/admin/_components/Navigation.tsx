@@ -12,6 +12,9 @@ import {
     X,
     WholeWord,
     Contact,
+    CarFront,
+    PlusCircle,
+    UserPlus,
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
@@ -80,6 +83,21 @@ export default function Navigation({
             label: m.lime_good_gorilla_pat(),
             href: "/admin/rules",
             icon: <WholeWord className="w-5 h-5" />,
+        },
+        {
+            label: "Driver Pool",
+            href: "/admin/driver-pool",
+            icon: <CarFront className="w-5 h-5" />,
+        },
+        {
+            label: "User Pool",
+            href: "/admin/user-pool",
+            icon: <UserPlus className="w-5 h-5" />,
+        },
+        {
+            label: "Add Ride",
+            href: "/admin/add-ride",
+            icon: <PlusCircle className="w-5 h-5" />,
         },
     ];
 

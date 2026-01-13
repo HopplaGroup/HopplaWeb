@@ -33,6 +33,13 @@ export default async function UpcomingRidesSection() {
             departure: {
                 gt: date,
             },
+            driver: {
+                idNumber: {
+                    not: {
+                        startsWith: "FD-",
+                    },
+                },
+            },
         },
         orderBy: {
             departure: "desc",

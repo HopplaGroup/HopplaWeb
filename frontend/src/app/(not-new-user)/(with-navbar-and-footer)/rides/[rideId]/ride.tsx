@@ -119,6 +119,10 @@ export function Ride({
       },
     },
   });
+
+  // Check if this is a fake/demo ride (driver from Driver Pool)
+  const isMRide = ride?.driver?.idNumber?.startsWith('FD-') ?? false;
+  console.log({ isMRide }, ride?.driver);
   const queryClient = useQueryClient();
   const queryKey = getQueryKey('User', 'findUnique', {
     where: {
@@ -545,7 +549,7 @@ export function Ride({
             </div>
           </div>
 
-          <div className="p-4 md:pl-28 md:pr-28">
+    {!isMRide &&       <div className="p-4 md:pl-28 md:pr-28">
             <div className="xl:w-[460px] flex flex-col justify-center ">
               <h2 className="font-semibold text-xl mb-2">
                 {m.seemly_same_fish_revive()}
@@ -1196,7 +1200,15 @@ export function Ride({
                 </div>
               </div>
             </div>
-          </div>
+          </div>}
+          {isMRide && (
+            <div className="p-4 md:pl-28 md:pr-28">
+              <div className="xl:w-[460px] bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                <CheckCheck className="w-5 h-5 text-green-600" />
+                <span className="text-green-700 font-medium">{m.top_proof_myna_animate()}</span>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         m.round_raw_shad_read()
