@@ -155,7 +155,11 @@ function generateRandomData(): AddDriverInput {
   };
 }
 
-export default function AddDriverButton() {
+export default function AddDriverButton({
+  onCreated,
+}: {
+  onCreated?: () => void;
+} = {}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { form, clientErrors, handleSubmit, loading, firstError, reset } =
@@ -167,7 +171,9 @@ export default function AddDriverButton() {
       {
         onSuccess: () => {
           setIsModalOpen(false);
+          form.reset(generateRandomData());
           reset();
+          onCreated?.();
         },
         onError: (_, err) => {
           console.error(err);
@@ -197,14 +203,13 @@ export default function AddDriverButton() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    form.reset(generateRandomData());
     reset();
   };
 
   const fillRandomData = () => {
     const data = generateRandomData();
-    Object.entries(data).forEach(([key, value]) => {
-      setValue(key as keyof AddDriverInput, value as never);
-    });
+    form.reset(data);
   };
 
   const addCarPhoto = (url: string) => {
@@ -220,7 +225,10 @@ export default function AddDriverButton() {
     <>
       <button
         type="button"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          fillRandomData();
+          setIsModalOpen(true);
+        }}
         className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 flex items-center gap-2"
       >
         <Plus className="w-4 h-4" />

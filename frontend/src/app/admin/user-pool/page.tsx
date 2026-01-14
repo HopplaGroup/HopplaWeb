@@ -38,7 +38,7 @@ export default function UserPoolPage() {
     }),
   };
 
-  const { data: usersCount } = useCountUser(
+  const { data: usersCount, refetch: refetchUsersCount } = useCountUser(
     {
       where: whereClause,
     },
@@ -47,7 +47,7 @@ export default function UserPoolPage() {
     }
   );
 
-  const { data: users, isLoading } = useFindManyUser(
+  const { data: users, isLoading, refetch: refetchUsers } = useFindManyUser(
     {
       where: whereClause,
       take: PAGE_COUNT,
@@ -72,7 +72,13 @@ export default function UserPoolPage() {
             Manage fake passengers for testing and demo purposes
           </p>
         </div>
-        <AddUserButton />
+        <AddUserButton
+          onCreated={() => {
+            setPage(1);
+            refetchUsers();
+            refetchUsersCount();
+          }}
+        />
       </div>
 
       <SearchBox

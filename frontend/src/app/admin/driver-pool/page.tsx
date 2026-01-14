@@ -38,7 +38,7 @@ export default function DriverPoolPage() {
     }),
   };
 
-  const { data: driversCount } = useCountUser(
+  const { data: driversCount, refetch: refetchDriversCount } = useCountUser(
     {
       where: whereClause,
     },
@@ -47,7 +47,7 @@ export default function DriverPoolPage() {
     }
   );
 
-  const { data: drivers, isLoading } = useFindManyUser(
+  const { data: drivers, isLoading, refetch: refetchDrivers } = useFindManyUser(
     {
       where: whereClause,
       include: {
@@ -76,7 +76,13 @@ export default function DriverPoolPage() {
             Manage fake drivers for testing and demo purposes
           </p>
         </div>
-        <AddDriverButton />
+        <AddDriverButton
+          onCreated={() => {
+            setPage(1);
+            refetchDrivers();
+            refetchDriversCount();
+          }}
+        />
       </div>
 
       <SearchBox

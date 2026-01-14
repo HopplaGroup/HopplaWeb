@@ -183,17 +183,20 @@ export default function AddRidePage() {
         (p) => p.id !== randomDriver.id
       );
 
-      if (availablePassengers.length < randomCar.capacity) {
-        toast.error(
-          `Not enough users in User Pool. Need ${randomCar.capacity}, only ${availablePassengers.length} available.`
-        );
+      if (availablePassengers.length === 0) {
+        toast.error("No users available in User Pool");
         setIsAutoFilling(false);
         return;
       }
 
-      // Shuffle and pick passengers to fill seats
+      // Decide randomly how many seats to fill: from 1 up to the car's total seats,
+      // but never more than the number of available passengers.
+      const maxPassengers = Math.min(randomCar.capacity, availablePassengers.length);
+      const numPassengers = Math.floor(Math.random() * maxPassengers) + 1;
+
+      // Shuffle and pick that many passengers
       const shuffled = [...availablePassengers].sort(() => Math.random() - 0.5);
-      const selectedPax = shuffled.slice(0, randomCar.capacity);
+      const selectedPax = shuffled.slice(0, numPassengers);
 
       // Pick random route
       const randomRoute =
@@ -216,17 +219,21 @@ export default function AddRidePage() {
       );
 
       // Random price between 10-50
-      const randomPrice = Math.floor(Math.random() * 40) + 10;
+      const randomPrice = Math.floor(Math.random() * 40) + 0;
 
-      // Randomly select 1-3 rules if rules exist
+      // Randomly select rules (0-3 rules, since it's optional)
       let randomRuleIds: string[] = [];
       if (allRules && allRules.length > 0) {
-        const numRules = Math.min(
-          Math.floor(Math.random() * 3) + 1,
-          allRules.length
-        );
-        const shuffledRules = [...allRules].sort(() => Math.random() - 0.5);
-        randomRuleIds = shuffledRules.slice(0, numRules).map((r) => r.id);
+        // Randomly decide whether to include rules (70% chance to include at least one)
+        const shouldIncludeRules = Math.random() < 0.7;
+        if (shouldIncludeRules) {
+          const numRules = Math.min(
+            Math.floor(Math.random() * 3) + 1,
+            allRules.length
+          );
+          const shuffledRules = [...allRules].sort(() => Math.random() - 0.5);
+          randomRuleIds = shuffledRules.slice(0, numRules).map((r) => r.id);
+        }
       }
 
       // Set all values
