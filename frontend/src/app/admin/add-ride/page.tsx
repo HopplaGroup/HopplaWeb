@@ -51,7 +51,7 @@ export default function AddRidePage() {
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
 
   // Fetch all available rules
-  const { data: allRules } = useFindManyRule();
+  const { data: allRules, isLoading: isLoadingRules } = useFindManyRule();
 
   const { form, clientErrors, handleSubmit, loading, reset } =
     useFormWithServerAction(
@@ -644,50 +644,62 @@ export default function AddRidePage() {
             <span className="text-xs text-gray-400 font-normal">(optional)</span>
           </h2>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {allRules?.map((rule) => {
-              const isSelected = selectedRuleIds.includes(rule.id);
-              const labels = rule.labels as { en: string; ka: string };
-              return (
-                <button
-                  key={rule.id}
-                  type="button"
-                  onClick={() => {
-                    if (isSelected) {
-                      setSelectedRuleIds(selectedRuleIds.filter((id) => id !== rule.id));
-                    } else {
-                      setSelectedRuleIds([...selectedRuleIds, rule.id]);
-                    }
-                  }}
-                  className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm cursor-pointer transition-all duration-200 ${
-                    isSelected
-                      ? "bg-primary/5 border-primary text-primary"
-                      : "bg-gray-50 border-gray-200 hover:border-primary/30 hover:bg-primary/5"
-                  }`}
-                >
-                  <div
-                    className={`shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+          {isLoadingRules ? (
+            <div className="text-center py-4 text-gray-500">Loading rules...</div>
+          ) : !allRules || allRules.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">
+              No rules found. Please add rules in the{" "}
+              <a href="/admin/rules" className="text-primary underline">
+                Rules Admin
+              </a>{" "}
+              page first.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {allRules.map((rule) => {
+                const isSelected = selectedRuleIds.includes(rule.id);
+                const labels = rule.labels as { en: string; ka: string };
+                return (
+                  <button
+                    key={rule.id}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedRuleIds(selectedRuleIds.filter((id) => id !== rule.id));
+                      } else {
+                        setSelectedRuleIds([...selectedRuleIds, rule.id]);
+                      }
+                    }}
+                    className={`flex items-center gap-2 p-3 border-2 rounded-xl text-sm cursor-pointer transition-all duration-200 ${
                       isSelected
-                        ? "border-primary bg-primary"
-                        : "border-gray-300 bg-white"
+                        ? "bg-primary/5 border-primary text-primary"
+                        : "bg-gray-50 border-gray-200 hover:border-primary/30 hover:bg-primary/5"
                     }`}
                   >
-                    {isSelected && (
-                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                    )}
-                  </div>
-                  {rule.svg && (
-                    // eslint-disable-next-line react/no-danger
                     <div
-                      className="w-4 h-4 fill-current"
-                      dangerouslySetInnerHTML={{ __html: rule.svg }}
-                    />
-                  )}
-                  <span className="text-left">{labels[languageTag()]}</span>
-                </button>
-              );
-            })}
-          </div>
+                      className={`shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                        isSelected
+                          ? "border-primary bg-primary"
+                          : "border-gray-300 bg-white"
+                      }`}
+                    >
+                      {isSelected && (
+                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                      )}
+                    </div>
+                    {rule.svg && (
+                      // eslint-disable-next-line react/no-danger
+                      <div
+                        className="w-4 h-4 fill-current"
+                        dangerouslySetInnerHTML={{ __html: rule.svg }}
+                      />
+                    )}
+                    <span className="text-left">{labels[languageTag()]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {selectedRuleIds.length > 0 && (
             <p className="text-sm text-gray-500 mt-3">

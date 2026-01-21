@@ -97,7 +97,7 @@ function generateRandomData(): AddUserInput {
   };
 }
 
-export default function AddUserButton() {
+export default function AddUserButton({ onCreated }: { onCreated?: () => void } = {}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { form, clientErrors, handleSubmit, loading, firstError, reset } =
@@ -109,7 +109,10 @@ export default function AddUserButton() {
       {
         onSuccess: () => {
           setIsModalOpen(false);
+          // Prepare fresh random defaults for the next open
+          form.reset(generateRandomData());
           reset();
+          onCreated?.();
         },
         onError: (_, err) => {
           console.error(err);
@@ -137,21 +140,23 @@ export default function AddUserButton() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    form.reset(generateRandomData());
     reset();
   };
 
   const fillRandomData = () => {
     const data = generateRandomData();
-    Object.entries(data).forEach(([key, value]) => {
-      setValue(key as keyof AddUserInput, value as never);
-    });
+    form.reset(data);
   };
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          fillRandomData();
+          setIsModalOpen(true);
+        }}
         className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 flex items-center gap-2"
       >
         <Plus className="w-4 h-4" />
