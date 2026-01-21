@@ -21,7 +21,7 @@ export default async function WithNavbarAndFooter({
       <header>
         <WholeNavigation user={user} />
       </header>
-      <main className="md:mt-20 mb-10">{children}</main>
+      <main className="md:mt-20 mb-20">{children}</main>
       <div>
         <FooterWrapper />
       </div>

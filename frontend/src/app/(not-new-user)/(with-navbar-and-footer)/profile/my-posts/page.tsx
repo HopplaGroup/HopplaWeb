@@ -7,17 +7,13 @@ import { PASSENGER_PREFERENCES } from "@/lib/constants/passenger-preferences";
 import { format } from "date-fns";
 import { ka, enUS } from "date-fns/locale";
 import { 
-  Calendar, 
-  Clock, 
-  Users, 
-  CheckCircle2,
-  XCircle,
   Loader2,
-  Bell,
   Plus,
-  Circle,
-  MapPin,
-  AlertTriangle
+  AlertTriangle,
+  Users,
+  Calendar,
+  Clock,
+  Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
@@ -34,9 +30,10 @@ import {
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useUser } from "@/lib/providers/UserProvider";
 
 const TIME_SLOT_LABELS = {
-  ANY: { en: "Any time", ka: "ნებისმიერ დროს" },
+  ANY: { en: "Any time", ka: "ნებისმიერი" },
   MORNING: { en: "Morning", ka: "დილა" },
   AFTERNOON: { en: "Afternoon", ka: "შუადღე" },
   EVENING: { en: "Evening", ka: "საღამო" },
@@ -46,35 +43,33 @@ const TIME_SLOT_LABELS = {
 const STATUS_CONFIG = {
   ACTIVE: {
     label: { en: "Active", ka: "აქტიური" },
-    icon: CheckCircle2,
-    dotColor: "bg-green-500",
-    bgColor: "bg-green-50 dark:bg-green-950/30",
-    textColor: "text-green-700 dark:text-green-400",
-    borderColor: "border-green-200 dark:border-green-800/50",
+    bgColor: "bg-emerald-500",
+    textColor: "text-white",
+    cardBorder: "border-l-emerald-500",
   },
   CANCELLED: {
     label: { en: "Cancelled", ka: "გაუქმებული" },
-    icon: XCircle,
-    dotColor: "bg-red-500",
-    bgColor: "bg-red-50 dark:bg-red-950/30",
-    textColor: "text-red-700 dark:text-red-400",
-    borderColor: "border-red-200 dark:border-red-800/50",
+    bgColor: "bg-gray-400",
+    textColor: "text-white",
+    cardBorder: "border-l-gray-400",
   },
   FULFILLED: {
     label: { en: "Fulfilled", ka: "შესრულებული" },
-    icon: CheckCircle2,
-    dotColor: "bg-blue-500",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30",
-    textColor: "text-blue-700 dark:text-blue-400",
-    borderColor: "border-blue-200 dark:border-blue-800/50",
+    bgColor: "bg-blue-500",
+    textColor: "text-white",
+    cardBorder: "border-l-blue-500",
   },
 };
 
 export default function MyPostsPage() {
   const lang = languageTag();
   const locale = lang === "ka" ? ka : enUS;
+  const { user } = useUser();
 
   const { data: posts, isLoading, refetch } = useFindManyPassengerTripRequest({
+    where: {
+      passengerId: user?.id,
+    },
     orderBy: { createdAt: "desc" },
     include: { passenger: true },
   });
@@ -124,28 +119,26 @@ export default function MyPostsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {lang === "ka" ? "ჩემი პოსტები" : "My Posts"}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {lang === "ka" 
-              ? "თქვენი მგზავრის პოსტების მართვა" 
-              : "Manage your passenger posts"}
+            {lang === "ka" ? "თქვენი მგზავრის მოთხოვნები" : "Your passenger requests"}
           </p>
         </div>
         <Link href="/request-ride">
-          <Button className="gap-2">
+          <Button className="gap-2 rounded-full bg-primary hover:bg-primary/90">
             <Plus className="size-4" />
             {lang === "ka" ? "ახალი პოსტი" : "New Post"}
           </Button>
         </Link>
       </div>
 
-      {/* Posts List */}
+      {/* Posts List - Grid on desktop, single column on mobile */}
       {posts && posts.length > 0 ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {posts.map((post) => {
             const statusConfig = STATUS_CONFIG[post.status as keyof typeof STATUS_CONFIG];
             const isCancelling = cancellingId === post.id;
@@ -155,143 +148,167 @@ export default function MyPostsPage() {
               <div
                 key={post.id}
                 className={cn(
-                  "group relative bg-white dark:bg-gray-900 rounded-2xl border overflow-hidden transition-all duration-200",
-                  isActive 
-                    ? "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-lg hover:shadow-gray-100 dark:hover:shadow-none" 
-                    : "border-gray-100 dark:border-gray-800/50 opacity-70"
+                  "relative bg-white dark:bg-gray-800/80 rounded-xl overflow-hidden border-l-4 shadow-sm hover:shadow-md transition-shadow",
+                  statusConfig.cardBorder,
+                  !isActive && "opacity-60"
                 )}
               >
-                {/* Status Strip */}
-                <div className={cn("h-1", statusConfig.dotColor)} />
-                
-                <div className="p-5">
-                  {/* Top Row: Route & Status */}
-                  <div className="flex items-start justify-between gap-4 mb-5">
-                    {/* Route Visualization */}
-                    <div className="flex items-start gap-3">
-                      <div className="flex flex-col items-center pt-1">
-                        <Circle className="size-3 text-gray-400 fill-white dark:fill-gray-900" strokeWidth={2.5} />
-                        <div className="w-0.5 h-8 bg-gradient-to-b from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500 my-1" />
-                        <MapPin className="size-4 text-primary" />
-                      </div>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-0.5">
-                            {lang === "ka" ? "საიდან" : "From"}
-                          </p>
-                          <p className="font-semibold text-gray-900 dark:text-gray-100">
-                            {getPlaceName(post.from)}
-                          </p>
+                {/* Status Badge - Only for non-active */}
+                {!isActive && (
+                  <div className={cn(
+                    "absolute top-0 right-0 px-2.5 py-1 text-[10px] font-bold uppercase rounded-bl-lg",
+                    statusConfig.bgColor,
+                    statusConfig.textColor
+                  )}>
+                    {statusConfig.label[lang]}
+                  </div>
+                )}
+
+                <div className="p-4">
+                  {/* Main Content */}
+                  <div className="flex gap-3">
+                    {/* Left: Date Column */}
+                    <div className="flex flex-col items-center justify-center min-w-[56px]">
+                      {post.departureDateFrom === post.departureDateTo ? (
+                        <>
+                          <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                            {format(new Date(post.departureDateFrom), "d", { locale })}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {format(new Date(post.departureDateFrom), "MMM", { locale })}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-center">
+                            <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                              {format(new Date(post.departureDateFrom), "d", { locale })}
+                              <span className="text-gray-400 mx-0.5">-</span>
+                              {format(new Date(post.departureDateTo), "d", { locale })}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {format(new Date(post.departureDateFrom), "MMM", { locale }) === format(new Date(post.departureDateTo), "MMM", { locale }) 
+                                ? format(new Date(post.departureDateFrom), "MMM", { locale })
+                                : `${format(new Date(post.departureDateFrom), "MMM", { locale })}-${format(new Date(post.departureDateTo), "MMM", { locale })}`
+                              }
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="w-px bg-gray-200 dark:bg-gray-700 self-stretch" />
+
+                    {/* Middle: Route */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2.5">
+                        {/* Route Line */}
+                        <div className="flex flex-col items-center pt-1.5 flex-shrink-0">
+                          <div className="w-2.5 h-2.5 rounded-full border-2 border-red-400 bg-white dark:bg-gray-800" />
+                          <div className="w-0.5 h-7 bg-gradient-to-b from-red-300 to-red-500 dark:from-red-400 dark:to-red-600" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
                         </div>
-                        <div>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-0.5">
-                            {lang === "ka" ? "სად" : "To"}
-                          </p>
-                          <p className="font-semibold text-gray-900 dark:text-gray-100">
-                            {getPlaceName(post.to)}
-                          </p>
+
+                        {/* Cities */}
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div>
+                            <div className="text-[10px] text-gray-400 uppercase tracking-wider">
+                              {lang === "ka" ? "საიდან" : "FROM"}
+                            </div>
+                            <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                              {getPlaceName(post.from)}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-gray-400 uppercase tracking-wider">
+                              {lang === "ka" ? "სად" : "TO"}
+                            </div>
+                            <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                              {getPlaceName(post.to)}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Status Badge */}
-                    <div className={cn(
-                      "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border",
-                      statusConfig.bgColor,
-                      statusConfig.textColor,
-                      statusConfig.borderColor
-                    )}>
-                      <span className={cn("size-2 rounded-full", statusConfig.dotColor)} />
-                      {statusConfig.label[lang]}
+                    {/* Right: Seats */}
+                    <div className="flex flex-col items-end justify-center">
+                      <div className="flex items-center gap-1 text-gray-600 dark:text-gray-300">
+                        <span className="text-lg font-bold">{post.seatsNeeded}</span>
+                        <Users className="size-4 text-gray-400" />
+                      </div>
+                      <div className="text-[10px] text-gray-400">
+                        {lang === "ka" ? "ადგილი" : "seats"}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Info Pills */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-gray-600 dark:text-gray-300">
-                      <Calendar className="size-3.5 text-gray-400" />
-                      <span className="font-medium">
-                        {format(new Date(post.departureDateFrom), "d MMM", { locale })}
-                        {post.departureDateFrom !== post.departureDateTo && (
-                          <span className="text-gray-400"> → {format(new Date(post.departureDateTo), "d MMM", { locale })}</span>
-                        )}
-                      </span>
+                  {/* Bottom Row: Meta Info & Actions */}
+                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center gap-2 flex-wrap">
+                    {/* Time Slot */}
+                    <div className="inline-flex items-center gap-1 text-[11px] px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-gray-600 dark:text-gray-300">
+                      <Clock className="size-3" />
+                      {TIME_SLOT_LABELS[post.preferredTimeSlot as keyof typeof TIME_SLOT_LABELS][lang]}
                     </div>
-                    
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-gray-600 dark:text-gray-300">
-                      <Clock className="size-3.5 text-gray-400" />
-                      <span className="font-medium">
-                        {TIME_SLOT_LABELS[post.preferredTimeSlot as keyof typeof TIME_SLOT_LABELS][lang]}
-                      </span>
-                    </div>
-                    
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-gray-600 dark:text-gray-300">
-                      <Users className="size-3.5 text-gray-400" />
-                      <span className="font-medium">
-                        {post.seatsNeeded} {lang === "ka" ? "ადგილი" : "seat(s)"}
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Preferences */}
-                  {post.preferences && Array.isArray(post.preferences) && post.preferences.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {(post.preferences as Array<{ id: string; en: string; ka: string }>).map((pref) => {
-                        const prefConfig = PASSENGER_PREFERENCES.find((p) => p.id === pref.id);
-                        return (
-                          <div
-                            key={pref.id}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/5 dark:bg-primary/10 rounded-full text-xs text-primary dark:text-primary-400 font-medium"
-                          >
-                            {prefConfig && (
-                              <span className="size-3.5 flex items-center justify-center [&>svg]:size-3.5">
+                    {/* Preferences Icons */}
+                    {post.preferences && Array.isArray(post.preferences) && post.preferences.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        {(post.preferences as Array<{ id: string; en: string; ka: string }>).slice(0, 3).map((pref) => {
+                          const prefConfig = PASSENGER_PREFERENCES.find((p) => p.id === pref.id);
+                          return prefConfig ? (
+                            <div
+                              key={pref.id}
+                              className="size-6 flex items-center justify-center bg-primary/10 dark:bg-primary/20 rounded-md text-primary"
+                              title={lang === "ka" ? pref.ka : pref.en}
+                            >
+                              <span className="[&>svg]:size-3.5">
                                 {prefConfig.icon}
                               </span>
-                            )}
-                            <span>{lang === "ka" ? pref.ka : pref.en}</span>
+                            </div>
+                          ) : null;
+                        })}
+                        {(post.preferences as Array<{ id: string }>).length > 3 && (
+                          <div className="text-[10px] text-gray-400">
+                            +{(post.preferences as Array<{ id: string }>).length - 3}
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    )}
 
-                  {/* Description */}
-                  {post.description && (
-                    <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                        &ldquo;{post.description}&rdquo;
-                      </p>
-                    </div>
-                  )} 
+                    {/* Spacer */}
+                    <div className="flex-1" />
 
-                  {/* Footer */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-                    <p className="text-xs text-gray-400 dark:text-gray-500">
-                      {lang === "ka" ? "შექმნილია" : "Posted"} {format(new Date(post.createdAt), "d MMM, HH:mm", { locale })}
-                    </p>
-                    
+                    {/* Cancel Button */}
                     {isActive && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
+                      <button
+                        type="button"
                         onClick={() => setPostToCancel(post.id)}
                         disabled={isCancelling}
-                        className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 -mr-2"
+                        className="inline-flex items-center gap-1 text-[11px] text-red-500 hover:text-red-600 font-medium disabled:opacity-50 px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                       >
                         {isCancelling ? (
                           <>
-                            <Loader2 className="size-4 mr-1.5 animate-spin" />
-                            {lang === "ka" ? "უქმდება..." : "Cancelling..."}
+                            <Loader2 className="size-3 animate-spin" />
+                            <span className="hidden sm:inline">{lang === "ka" ? "უქმდება..." : "Cancelling..."}</span>
                           </>
                         ) : (
                           <>
-                            <XCircle className="size-4 mr-1.5" />
-                            {lang === "ka" ? "გაუქმება" : "Cancel"}
+                            <Trash2 className="size-3" />
+                            <span>{lang === "ka" ? "გაუქმება" : "Cancel"}</span>
                           </>
                         )}
-                      </Button>
+                      </button>
                     )}
                   </div>
+
+                  {/* Description if exists */}
+                  {post.description && (
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 line-clamp-1 italic">
+                      &ldquo;{post.description}&rdquo;
+                    </p>
+                  )}
                 </div>
               </div>
             );
@@ -299,30 +316,24 @@ export default function MyPostsPage() {
         </div>
       ) : (
         /* Empty State */
-        <div className="relative overflow-hidden text-center py-16 px-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-          {/* Background decoration */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-          
-          <div className="relative">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5 rotate-3">
-              <Bell className="size-10 text-primary" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              {lang === "ka" ? "პოსტები არ გაქვთ" : "No posts yet"}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto">
-              {lang === "ka" 
-                ? "შექმენით პოსტი და მძღოლები თავად გიპოვიან" 
-                : "Create a post and let drivers find you"}
-            </p>
-            <Link href="/request-ride">
-              <Button size="lg" className="gap-2 rounded-xl">
-                <Plus className="size-5" />
-                {lang === "ka" ? "პოსტის შექმნა" : "Create Post"}
-              </Button>
-            </Link>
+        <div className="text-center py-16 px-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+          <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center mx-auto mb-5">
+            <Calendar className="size-9 text-primary" />
           </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            {lang === "ka" ? "პოსტები არ გაქვთ" : "No posts yet"}
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+            {lang === "ka" 
+              ? "შექმენით პოსტი და მძღოლები თავად გიპოვიან" 
+              : "Create a post and let drivers find you"}
+          </p>
+          <Link href="/request-ride">
+            <Button className="gap-2 rounded-full">
+              <Plus className="size-4" />
+              {lang === "ka" ? "პოსტის შექმნა" : "Create Post"}
+            </Button>
+          </Link>
         </div>
       )}
 
