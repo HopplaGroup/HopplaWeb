@@ -3,8 +3,11 @@ import { RideResponse } from "@/app/(not-new-user)/(with-navbar-and-footer)/sear
 import * as m from "@/paraglide/messages.js";
 import RideCardEmpty from "@/app/(not-new-user)/(with-navbar-and-footer)/search/_components/ride-card-empty";
 import db from "@/lib/utils/db";
+import { unstable_noStore as noStore } from "next/cache";
 
 export default async function UpcomingRidesSection() {
+    // Disable caching so new rides show immediately
+    noStore();
     const date = new Date();
 
     const currentRides = await db.ride.findMany({

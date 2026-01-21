@@ -40,6 +40,7 @@ import { RideCreateSchema } from "@zenstackhq/runtime/zod/models";
 
 import { useCreateRide } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
+import { revalidateHomePage } from "./actions";
 import { cn } from "@/lib/utils/cn";
 
 const FormSchema = RideCreateSchema.extend({
@@ -90,7 +91,8 @@ export function CreateRideForm({
                 },
             },
             {
-                onSuccess(data) {
+                async onSuccess(data) {
+                    await revalidateHomePage();
                     toast.success(m.mellow_nimble_earthworm_coax());
                     if (data) {
                         router.push(`/rides/${data.id}`);

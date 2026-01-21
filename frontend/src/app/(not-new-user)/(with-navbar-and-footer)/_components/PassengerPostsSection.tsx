@@ -1,8 +1,11 @@
 import db from "@/lib/utils/db";
 import { PassengerPostsCarousel } from "./PassengerPostsCarousel";
 import * as m from "@/paraglide/messages.js";
+import { unstable_noStore as noStore } from "next/cache";
 
 export default async function PassengerPostsSection() {
+  // Disable caching so new posts show immediately
+  noStore();
   // Fetch ALL active passenger trip requests (not filtered by user)
   const posts = await db.passengerTripRequest.findMany({
     where: {
@@ -26,10 +29,6 @@ export default async function PassengerPostsSection() {
     },
     take: 20,
   });
-
-  // Debug: Log the number of posts and passenger IDs
-  console.log("PassengerPostsSection - Total posts found:", posts?.length);
-  console.log("PassengerPostsSection - Passenger IDs:", posts?.map(p => p.passengerId));
 
   if (!posts || posts.length === 0) return null;
 

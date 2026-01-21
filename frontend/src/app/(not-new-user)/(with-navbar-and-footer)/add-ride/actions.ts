@@ -4,6 +4,11 @@ import { createServerAction } from "@/lib/utils/create-server-action";
 import { z } from "zod";
 import PLACES from "@/lib/constants/places";
 import { menv } from "@/lib/utils/menv";
+import { revalidatePath } from "next/cache";
+
+export async function revalidateHomePage() {
+  revalidatePath("/");
+}
 
 export const getDirections = createServerAction(
     z.object({

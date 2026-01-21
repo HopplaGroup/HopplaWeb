@@ -18,6 +18,7 @@ import PLACES from "@/lib/constants/places";
 import { languageTag } from "@/paraglide/runtime";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useCreatePassengerTripRequest } from "@/lib/hooks";
+import { revalidateHomePage } from "./actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
@@ -115,7 +116,8 @@ export function PassengerTripRequestForm() {
         },
       },
       {
-        onSuccess() {
+        async onSuccess() {
+          await revalidateHomePage();
           toast.success(m.noisy_vivid_mule_amuse());
           setIsRedirecting(true);
           router.push("/profile/my-posts");
