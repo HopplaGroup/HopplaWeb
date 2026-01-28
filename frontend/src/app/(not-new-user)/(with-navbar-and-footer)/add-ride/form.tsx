@@ -47,6 +47,19 @@ const FormSchema = RideCreateSchema.extend({
     ruleIds: z.array(z.string()).optional(),
 });
 
+const FuelPricePerLitre = 2.5;
+const FuelConsumptionPerKm = 0.1;
+
+const getPriceByDistance = (distance: number) => {
+    return Number(
+        (
+            FuelPricePerLitre *
+            (distance / 1000) *
+            FuelConsumptionPerKm
+        ).toFixed(2)
+    );
+};
+
 export function CreateRideForm({
     user,
     cars,
@@ -102,30 +115,20 @@ export function CreateRideForm({
         );
     }
 
-    const FuelPricePerLitre = 2.5;
-    const FuelConsumptionPerKm = 0.1;
-
-    const getPriceByDistance = (distance: number) => {
-        return Number(
-            (
-                FuelPricePerLitre *
-                (distance / 1000) *
-                FuelConsumptionPerKm
-            ).toFixed(2)
-        );
-    };
+    // Watch form values properly outside of useEffect
+    const fromValue = form.watch("from");
+    const toValue = form.watch("to");
 
     useEffect(() => {
-        const { from, to } = form.getValues();
-        if (!from || !to) return;
-        getDirections({ from, to }).then((res) => {
+        if (!fromValue || !toValue) return;
+        getDirections({ from: fromValue, to: toValue }).then((res) => {
             setBestPriceValue(
                 res.success ? getPriceByDistance(res.data.distance) : 0
             );
             form.setValue("distance", res.success ? res.data.distance : 0);
             form.setValue("duration", res.success ? res.data.duration : 0);
         });
-    }, [form.watch("from"), form.watch("to")]);
+    }, [fromValue, toValue, form]);
 
     return (
         <Form {...form}>
@@ -393,7 +396,7 @@ export function CreateRideForm({
                                 {m.happy_patchy_frog_animate()}{" "}
                                 {(
                                     (bestPriceValue || 0) /
-                                    (selectedCar?.capacity || 1)
+                                    (form.watch("availableSeats") || 1)
                                 ).toFixed(1)}{" "}
                                 {m.flaky_wide_samuel_drum()}
                             </FormDescription>
